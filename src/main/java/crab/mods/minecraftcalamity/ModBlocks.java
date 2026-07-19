@@ -18,9 +18,9 @@ public class ModBlocks {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, MinecraftCalamity.MODID);
 
-    // 1. Define your Calamity Crafting Station Block
+    // Swap out "new Block" for your custom "new CalamityCraftingStationBlock"
     public static final RegistryObject<Block> CALAMITY_CRAFTING_STATION = registerBlock("calamity_crafting_station",
-            () -> new Block(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).strength(3.5f).requiresCorrectToolForDrops()));
+            () -> new CalamityCraftingStationBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).strength(3.5f).requiresCorrectToolForDrops()));
 
     // Helper method to automatically create the block item when we create a block
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {

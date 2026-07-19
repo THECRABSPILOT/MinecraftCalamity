@@ -2,7 +2,9 @@ package crab.mods.minecraftcalamity;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -45,26 +47,31 @@ public class MinecraftCalamity {
     public static final RegistryObject<Item> EXAMPLE_ITEM = ITEMS.register("example_item", () -> new Item(new Item.Properties().food(new FoodProperties.Builder()
             .alwaysEat().nutrition(1).saturationMod(2f).build())));
 
-    // Custom Creative Tab housing both template items and your new station
+    public static final RegistryObject<Item> GLASS_INGOT = ITEMS.register("glass_ingot", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> EMPTY_SPLASH_BOTTLE = ITEMS.register("empty_splash_bottle", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> EMPTY_LINGERING_BOTTLE = ITEMS.register("empty_lingering_bottle", () -> new Item(new Item.Properties()));
+    // Custom Creative Tab housing all items
+    // Custom Creative Tab housing all items
     public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
+            .icon(() -> GLASS_INGOT.get().getDefaultInstance())
+            .title(Component.translatable("itemGroup.minecraftcalamity.example_tab")) // <-- ADD THIS LINE
             .displayItems((parameters, output) -> {
                 output.accept(EXAMPLE_ITEM.get());
-                // Automatically add your Calamity Crafting Station here too!
                 output.accept(ModBlocks.CALAMITY_CRAFTING_STATION.get());
+                output.accept(GLASS_INGOT.get());
+                output.accept(EMPTY_SPLASH_BOTTLE.get());
+                output.accept(EMPTY_LINGERING_BOTTLE.get());
             }).build());
 
-    // Cleaned up 47.4.18 Constructor using injected context
     public MinecraftCalamity(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
 
-        // Register your external block system
         ModBlocks.register(modEventBus);
+        ModMenuTypes.register(modEventBus); // Registered before system initialization
 
-        // Register the built-in inline template registers
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
@@ -92,11 +99,17 @@ public class MinecraftCalamity {
         LOGGER.info("HELLO from server starting");
     }
 
+    // Client-side automated event runner
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("HELLO FROM CLIENT SETUP");
+
+            // Forces the menu system to map the custom screen engine on client thread setup
+            event.enqueueWork(() -> {
+                MenuScreens.register(ModMenuTypes.CALAMITY_CRAFTING_MENU.get(), CalamityCraftingScreen::new);
+            });
         }
     }
 }
