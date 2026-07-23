@@ -17,7 +17,7 @@ public class AccessoryCapability implements ICapabilityProvider, INBTSerializabl
     public static final Capability<IAccessoryInventory> ACCESSORY_CAP =
             CapabilityManager.get(new CapabilityToken<IAccessoryInventory>() {});
 
-    private final ItemStackHandler inventory = new ItemStackHandler(4); // 4 accessory slots
+    private final ItemStackHandler inventory = new ItemStackHandler(8); // 4 accessory slots
     private final LazyOptional<IAccessoryInventory> optional = LazyOptional.of(() -> new IAccessoryInventory() {
         @Override
         public ItemStackHandler getInventory() {
