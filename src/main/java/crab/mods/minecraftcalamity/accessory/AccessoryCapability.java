@@ -1,7 +1,9 @@
 package crab.mods.minecraftcalamity.accessory;
 
+import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -17,7 +19,23 @@ public class AccessoryCapability implements ICapabilityProvider, INBTSerializabl
     public static final Capability<IAccessoryInventory> ACCESSORY_CAP =
             CapabilityManager.get(new CapabilityToken<IAccessoryInventory>() {});
 
-    private final ItemStackHandler inventory = new ItemStackHandler(8); // 4 accessory slots
+    // Override size behavior directly inside ItemStackHandler
+    private final ItemStackHandler inventory = new ItemStackHandler(8) {
+        @Override
+        public void deserializeNBT(CompoundTag nbt) {
+            super.deserializeNBT(nbt);
+            // CRITICAL FIX: Prevent Forge NBT loading from shrinking inventory to 4
+            if (this.getSlots() < 8) {
+                this.setSize(8);
+            }
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            return stack.is(AccessoryMenu.ACCESSORIES_TAG);
+        }
+    };
+
     private final LazyOptional<IAccessoryInventory> optional = LazyOptional.of(() -> new IAccessoryInventory() {
         @Override
         public ItemStackHandler getInventory() {
