@@ -1,13 +1,13 @@
 package crab.mods.minecraftcalamity;
 
+import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.config.CalamityConfig;
-
-
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
 import crab.mods.minecraftcalamity.network.ModMessages;
+import crab.mods.minecraftcalamity.network.SyncAccessoriesS2CPacket;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -17,7 +17,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -28,6 +32,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod(MinecraftCalamity.MODID)
+@Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class MinecraftCalamity {
 
     public static final String MODID = "minecraftcalamity";
@@ -45,8 +50,8 @@ public class MinecraftCalamity {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModItems.register(modEventBus);
-        // 2. Register Mod Class Modules
 
+        // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
 
         // 3. Register Network Channel
@@ -77,5 +82,48 @@ public class MinecraftCalamity {
                         Component.literal(" ")
                 )
         );
+    }
+
+    // =========================================================
+    // ACCESSORY SYNC EVENT LISTENERS
+    // =========================================================
+
+    // Sync when player entity joins/spawns in the level
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
+            syncAccessories(player);
+        }
+    }
+
+    // Sync when player respawns
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            syncAccessories(player);
+        }
+    }
+
+    // Sync when player changes dimensions
+    @SubscribeEvent
+    public static void onPlayerDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            syncAccessories(player);
+        }
+    }
+
+    // Sync whenever player closes a menu (GUI)
+    @SubscribeEvent
+    public static void onContainerClose(PlayerContainerEvent.Close event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            syncAccessories(player);
+        }
+    }
+
+    // Helper method to send NBT data to client
+    public static void syncAccessories(ServerPlayer player) {
+        player.getCapability(AccessoryCapability.ACCESSORY_CAP).ifPresent(cap -> {
+            ModMessages.sendToPlayer(new SyncAccessoriesS2CPacket(cap.serializeNBT()), player);
+        });
     }
 }
