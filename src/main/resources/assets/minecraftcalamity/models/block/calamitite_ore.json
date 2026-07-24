@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "minecraftcalamity:block/calamitite_ore"
+  }
+}

@@ -1,6 +1,7 @@
 package crab.mods.minecraftcalamity;
 
 import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.config.CalamityConfig;
 import crab.mods.minecraftcalamity.items.ModItems;
@@ -50,6 +51,7 @@ public class MinecraftCalamity {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
 
         // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
