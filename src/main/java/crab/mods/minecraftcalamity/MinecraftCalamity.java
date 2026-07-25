@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -33,6 +34,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 @Mod(MinecraftCalamity.MODID)
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -45,6 +47,17 @@ public class MinecraftCalamity {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
+    // Register Creative Tab
+    public static final RegistryObject<CreativeModeTab> CALAMITY_TAB = CREATIVE_MODE_TABS.register("calamity_tab",
+            () -> CreativeModeTab.builder()
+                    .icon(() -> new ItemStack(ModItems.HELLFORGE.get())) // Icon displayed on tab header
+                    .title(Component.translatable("creativetab.minecraftcalamity.tab"))
+                    .displayItems((parameters, output) -> {
+                        // Populates tab with all items registered in ModItems
+                        ModItems.ITEMS.getEntries().forEach(item -> output.accept(item.get()));
+                    })
+                    .build());
+
     public MinecraftCalamity(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
@@ -56,6 +69,7 @@ public class MinecraftCalamity {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModRecipes.register(modEventBus);
+
         // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
 
@@ -93,7 +107,6 @@ public class MinecraftCalamity {
     // ACCESSORY SYNC EVENT LISTENERS
     // =========================================================
 
-    // Sync when player entity joins/spawns in the level
     @SubscribeEvent
     public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (!event.getLevel().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
@@ -101,7 +114,6 @@ public class MinecraftCalamity {
         }
     }
 
-    // Sync when player respawns
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -109,7 +121,6 @@ public class MinecraftCalamity {
         }
     }
 
-    // Sync when player changes dimensions
     @SubscribeEvent
     public static void onPlayerDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -117,7 +128,6 @@ public class MinecraftCalamity {
         }
     }
 
-    // Sync whenever player closes a menu (GUI)
     @SubscribeEvent
     public static void onContainerClose(PlayerContainerEvent.Close event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -125,7 +135,6 @@ public class MinecraftCalamity {
         }
     }
 
-    // Helper method to send NBT data to client
     public static void syncAccessories(ServerPlayer player) {
         player.getCapability(AccessoryCapability.ACCESSORY_CAP).ifPresent(cap -> {
             ModMessages.sendToPlayer(new SyncAccessoriesS2CPacket(cap.serializeNBT()), player);

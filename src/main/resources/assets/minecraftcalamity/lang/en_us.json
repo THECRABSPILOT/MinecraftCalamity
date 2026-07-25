@@ -4,5 +4,12 @@
   "container.minecraftcalamity.accessory": "Accessories",
   "key.minecraftcalamity.open_accessory_menu": "Open Accessory Menu",
   "key.categories.minecraftcalamity": "Minecraft Calamity",
-  "item.minecraftcalamity.cloud_in_a_jar": "Cloud in a Jar"
+  "item.minecraftcalamity.cloud_in_a_jar": "Cloud in a Jar",
+  "item.minecraftcalamity.blacksteel_ingot": "Blacksteel Ingot",
+  "block.minecraftcalamity.hellforge": "Hellforge",
+  "block.minecraftcalamity.calamitite_ore": "Calamitite Ore",
+  "item.minecraftcalamity.calamitite_scrap": "Calamitite Scrap",
+  "creativetab.minecraftcalamity.tab": "Minecraft Calamity",
+  "item.minecraftcalamity.calaitite_ingot": "Calamitite Ingot"
+
 }

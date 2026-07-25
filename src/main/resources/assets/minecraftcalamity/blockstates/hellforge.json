@@ -1,5 +1,19 @@
 {
   "variants": {
-    "": { "model": "minecraftcalamity:block/hellforge" }
+    "facing=north": {
+      "model": "minecraftcalamity:block/hellforge"
+    },
+    "facing=east": {
+      "model": "minecraftcalamity:block/hellforge",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "minecraftcalamity:block/hellforge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "minecraftcalamity:block/hellforge",
+      "y": 270
+    }
   }
 }

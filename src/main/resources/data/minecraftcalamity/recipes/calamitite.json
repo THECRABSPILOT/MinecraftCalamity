@@ -1,0 +1,15 @@
+{
+  "type": "minecraftcalamity:hellforge",
+  "ingredients": [
+    {
+      "item": "minecraftcalamity:blacksteel_ingot"
+    },
+    {
+      "item": "minecraftcalamity:calamitite_scrap"
+    }
+  ],
+  "output": {
+    "item": "minecraftcalamity:calamitite_ingot",
+    "count": 1
+  }
+}

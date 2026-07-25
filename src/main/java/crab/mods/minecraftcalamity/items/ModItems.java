@@ -32,6 +32,9 @@ public class ModItems {
     public static final RegistryObject<Item> BLACKSTEEL_INGOT = ITEMS.register("blacksteel_ingot",
             () -> new Item(new Item.Properties()));
 
+    public static final RegistryObject<Item> CALAMITITE_INGOT = ITEMS.register("calamitite_ingot",
+            () -> new Item(new Item.Properties()));
+
     public static final RegistryObject<Item> HELLFORGE = ITEMS.register("hellforge",
             () -> new BlockItem(ModBlocks.HELLFORGE.get(), new Item.Properties()));
 
