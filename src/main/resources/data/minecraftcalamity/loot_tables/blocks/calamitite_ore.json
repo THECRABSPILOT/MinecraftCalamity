@@ -13,6 +13,13 @@
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
+        },
+        {
+          "condition": "minecraft:has_stating_tool_or_similar",
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "has_the_correct_tool": true
+          }
         }
       ]
     }
