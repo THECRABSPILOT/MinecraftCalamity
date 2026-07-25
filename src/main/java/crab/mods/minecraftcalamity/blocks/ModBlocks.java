@@ -3,6 +3,7 @@ package crab.mods.minecraftcalamity.blocks;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.util.valueproviders.ConstantInt;
@@ -24,6 +25,13 @@ public class ModBlocks {
                             .strength(3.0F, 3.0F), // Hardness & Resistance
                     ConstantInt.of(2) // XP dropped on mining
             ));
+
+
+    public static final RegistryObject<Block> HELLFORGE = BLOCKS.register("hellforge",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(3.5F, 6.0F) // Hardness and Explosion Resistance
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.STONE)));
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);

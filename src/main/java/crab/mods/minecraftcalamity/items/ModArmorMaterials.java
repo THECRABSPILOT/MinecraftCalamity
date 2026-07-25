@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 public enum ModArmorMaterials implements ArmorMaterial {
     // This enum constant MUST match "CUSTOM_ARMOR" exactly!
-    CUSTOM_ARMOR("custom_armor", 28, new int[]{ 3, 8, 6, 3 }, 15,
+    CALAMITITE_ARMOR("calamitite_armor", 28, new int[]{ 3, 8, 6, 3 }, 15,
             SoundEvents.ARMOR_EQUIP_NETHERITE, 2.0F, 0.1F, () -> Ingredient.of(Items.DIAMOND));
 
     private final String name;

@@ -25,18 +25,29 @@ public class ModItems {
     public static final RegistryObject<Item> CLOUD_IN_A_JAR = ITEMS.register("cloud_in_a_jar",
             () -> new CloudInAJar(new Item.Properties().stacksTo(1)));
 
+    // MATERIALS
+    public static final RegistryObject<Item> CALAMITITE_SCRAP = ITEMS.register("calamitite_scrap",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> BLACKSTEEL_INGOT = ITEMS.register("blacksteel_ingot",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> HELLFORGE = ITEMS.register("hellforge",
+            () -> new BlockItem(ModBlocks.HELLFORGE.get(), new Item.Properties()));
+
+
     // ARMOR
-    public static final RegistryObject<Item> CUSTOM_HELMET = ITEMS.register("custom_helmet",
-            () -> new CustomArmorItem(ModArmorMaterials.CUSTOM_ARMOR, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistryObject<Item> CALAMITITE_HELMET = ITEMS.register("calamitite_helmet",
+            () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.HELMET, new Item.Properties()));
 
-    public static final RegistryObject<Item> CUSTOM_CHESTPLATE = ITEMS.register("custom_chestplate",
-            () -> new CustomArmorItem(ModArmorMaterials.CUSTOM_ARMOR, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistryObject<Item> CALAMITITE_CHESTPLATE = ITEMS.register("calamitite_chestplate",
+            () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
 
-    public static final RegistryObject<Item> CUSTOM_LEGGINGS = ITEMS.register("custom_leggings",
-            () -> new CustomArmorItem(ModArmorMaterials.CUSTOM_ARMOR, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final RegistryObject<Item> CALAMITITE_LEGGINGS = ITEMS.register("calamitite_leggings",
+            () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.LEGGINGS, new Item.Properties()));
 
-    public static final RegistryObject<Item> CUSTOM_BOOTS = ITEMS.register("custom_boots",
-            () -> new CustomArmorItem(ModArmorMaterials.CUSTOM_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final RegistryObject<Item> CALAMITITE_BOOTS = ITEMS.register("calamitite_boots",
+            () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
