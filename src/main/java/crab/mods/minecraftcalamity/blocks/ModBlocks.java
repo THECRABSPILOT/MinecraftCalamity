@@ -16,20 +16,19 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, MinecraftCalamity.MODID);
 
-    // DropExperienceBlock handles dropping XP when mined (like Coal or Diamond ore)
     public static final RegistryObject<Block> CALAMITITE_ORE = BLOCKS.register("calamitite_ore",
             () -> new DropExperienceBlock(
                     BlockBehaviour.Properties.of()
                             .mapColor(MapColor.STONE)
                             .requiresCorrectToolForDrops()
-                            .strength(3.0F, 3.0F), // Hardness & Resistance
-                    ConstantInt.of(2) // XP dropped on mining
+                            .strength(3.0F, 3.0F),
+                    ConstantInt.of(2)
             ));
 
-
+    // Updated to use HellforgeBlock
     public static final RegistryObject<Block> HELLFORGE = BLOCKS.register("hellforge",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(3.5F, 6.0F) // Hardness and Explosion Resistance
+            () -> new HellforgeBlock(BlockBehaviour.Properties.of()
+                    .strength(3.5F, 6.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.STONE)));
 

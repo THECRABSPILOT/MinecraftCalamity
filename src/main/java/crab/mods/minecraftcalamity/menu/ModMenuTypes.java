@@ -16,6 +16,10 @@ public class ModMenuTypes {
     public static final RegistryObject<MenuType<AccessoryMenu>> ACCESSORY_MENU =
             MENUS.register("accessory_menu", () -> IForgeMenuType.create(AccessoryMenu::new));
 
+    // Register the Hellforge Menu
+    public static final RegistryObject<MenuType<HellforgeMenu>> HELLFORGE_MENU =
+            MENUS.register("hellforge_menu", () -> IForgeMenuType.create(HellforgeMenu::new));
+
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }

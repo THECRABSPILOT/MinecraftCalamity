@@ -14,6 +14,10 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import crab.mods.minecraftcalamity.client.gui.HellforgeScreen;
+import crab.mods.minecraftcalamity.menu.ModMenuTypes;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
@@ -27,6 +31,16 @@ public class ClientModEvents {
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(CALAMITITE_ARMOR_LAYER, CalamititeArmorModel::createBodyLayer);
     }
+
+
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            MenuScreens.register(ModMenuTypes.HELLFORGE_MENU.get(), HellforgeScreen::new);
+        });
+    }
+
 
     // 3. Forge Bus Listener for Player Layer Hiding
     @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)

@@ -2,6 +2,7 @@ package crab.mods.minecraftcalamity;
 
 import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
+import crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.config.CalamityConfig;
 import crab.mods.minecraftcalamity.items.ModItems;
@@ -9,6 +10,7 @@ import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
 import crab.mods.minecraftcalamity.network.ModMessages;
 import crab.mods.minecraftcalamity.network.SyncAccessoriesS2CPacket;
+import crab.mods.minecraftcalamity.recipe.ModRecipes;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -52,7 +54,8 @@ public class MinecraftCalamity {
         CREATIVE_MODE_TABS.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
-
+        ModBlockEntities.register(modEventBus);
+        ModRecipes.register(modEventBus);
         // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
 
