@@ -1,12 +1,12 @@
 package crab.mods.minecraftcalamity.blocks;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -28,6 +28,12 @@ public class ModBlocks {
     // Updated to use HellforgeBlock
     public static final RegistryObject<Block> HELLFORGE = BLOCKS.register("hellforge",
             () -> new HellforgeBlock(BlockBehaviour.Properties.of()
+                    .strength(3.5F, 6.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.STONE)));
+
+    public static final RegistryObject<Block> ARCANE_WORKBENCH = BLOCKS.register("arcane_workbench",
+            () -> new ArcaneWorkbenchBlock(BlockBehaviour.Properties.of()
                     .strength(3.5F, 6.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.STONE)));

@@ -20,6 +20,10 @@ public class ModMenuTypes {
     public static final RegistryObject<MenuType<HellforgeMenu>> HELLFORGE_MENU =
             MENUS.register("hellforge_menu", () -> IForgeMenuType.create(HellforgeMenu::new));
 
+    // FIXED: Changed HellforgeMenu to ArcaneWorkbenchMenu
+    public static final RegistryObject<MenuType<ArcaneWorkbenchMenu>> ARCANE_WORKBENCH_MENU =
+            MENUS.register("arcane_workbench_menu", () -> IForgeMenuType.create(ArcaneWorkbenchMenu::new));
+
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }

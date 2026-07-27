@@ -17,6 +17,11 @@ public class ModBlockEntities {
                     BlockEntityType.Builder.of(HellforgeBlockEntity::new,
                             ModBlocks.HELLFORGE.get()).build(null));
 
+    public static final RegistryObject<BlockEntityType<ArcaneWorkbenchBlockEntity>> ARCANE_WORKBENCH_BE =
+            BLOCK_ENTITIES.register("arcane_workbench_be", () ->
+                    BlockEntityType.Builder.of(ArcaneWorkbenchBlockEntity::new,
+                            ModBlocks.ARCANE_WORKBENCH.get()).build(null));
+
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

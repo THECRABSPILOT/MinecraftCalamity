@@ -2,6 +2,7 @@ package crab.mods.minecraftcalamity.items;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
+import crab.mods.minecraftcalamity.items.staves.ModularStaffItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -9,6 +10,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+
+
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS =
@@ -38,6 +41,33 @@ public class ModItems {
     public static final RegistryObject<Item> HELLFORGE = ITEMS.register("hellforge",
             () -> new BlockItem(ModBlocks.HELLFORGE.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> ARCANE_WORKBENCH = ITEMS.register("arcane_workbench",
+            () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WOODEN_STAFF = ITEMS.register("wooden_staff",
+            () -> new ModularStaffItem(new Item.Properties()
+                    .stacksTo(1)
+            ));
+
+//SPELLS
+
+    public static final RegistryObject<Item> FIREBALL_CORE = ITEMS.register("fireball_core",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> SPEED_MODIFIER = ITEMS.register("speed_modifier",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> BOUNCE_MODIFIER = ITEMS.register("bounce_modifier",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> LIGHTNING_CORE = ITEMS.register("lightning_core",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> SPLINTER_MODIFIER = ITEMS.register("splinter_modifier",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> SPLIT_MODIFER = ITEMS.register("split_modifier",
+            () -> new Item(new Item.Properties()));
 
     // ARMOR
     public static final RegistryObject<Item> CALAMITITE_HELMET = ITEMS.register("calamitite_helmet",
