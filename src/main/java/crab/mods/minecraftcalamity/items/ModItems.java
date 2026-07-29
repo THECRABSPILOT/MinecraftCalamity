@@ -5,6 +5,7 @@ import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
+import crab.mods.minecraftcalamity.items.magicitems.StaffSpellItem;
 import crab.mods.minecraftcalamity.items.magicitems.UniqueBooks.MonsterBookItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
@@ -50,29 +51,23 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> WOODEN_STAFF = ITEMS.register("wooden_staff",
-            () -> new ModularStaffItem(new Item.Properties()
-                    .stacksTo(1)
-            ));
-
+            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),2,10,0.2));
 //STAFF SPELLS
 
     public static final RegistryObject<Item> FIREBALL_CORE = ITEMS.register("fireball_core",
-            () -> new Item(new Item.Properties()));
+            () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "projectile"));
 
-    public static final RegistryObject<Item> SPEED_MODIFIER = ITEMS.register("speed_modifier",
-            () -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> BOUNCE_MODIFIER = ITEMS.register("bounce_modifier",
-            () -> new Item(new Item.Properties()));
+            () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "modifier"));
 
     public static final RegistryObject<Item> LIGHTNING_CORE = ITEMS.register("lightning_core",
-            () -> new Item(new Item.Properties()));
+            () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "projectile"));
 
-    public static final RegistryObject<Item> SPLINTER_MODIFIER = ITEMS.register("splinter_modifier",
-            () -> new Item(new Item.Properties()));
+
 
     public static final RegistryObject<Item> SPLIT_MODIFER = ITEMS.register("split_modifier",
-            () -> new Item(new Item.Properties()));
+            () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "modifier"));
 
 
     // ARMOR

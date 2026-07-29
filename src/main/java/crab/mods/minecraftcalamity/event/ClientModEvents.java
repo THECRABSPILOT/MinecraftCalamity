@@ -154,10 +154,13 @@ public class ClientModEvents {
 
             Player player = mc.player;
 
-            boolean holdingSpellBook = player.getMainHandItem().getItem() instanceof SpellBookItem
-                    || player.getOffhandItem().getItem() instanceof SpellBookItem;
+            // Check if holding either the SpellBookItem or the ModularStaffItem
+            boolean holdingMagicItem = player.getMainHandItem().getItem() instanceof SpellBookItem
+                    || player.getOffhandItem().getItem() instanceof SpellBookItem
+                    || player.getMainHandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem
+                    || player.getOffhandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
 
-            if (holdingSpellBook) {
+            if (holdingMagicItem) {
                 player.getCapability(ManaCapabilityProvider.PLAYER_MANA).ifPresent(mana -> {
                     int currentMana = mana.getCurrentMana();
                     int maxMana = mana.getMaxMana(player);

@@ -1,192 +1,190 @@
 package crab.mods.minecraftcalamity.items.magicitems;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
+import crab.mods.minecraftcalamity.capability.PlayerMana;
+import crab.mods.minecraftcalamity.items.spells.StaffSpells;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.EntityType;
-
-import net.minecraft.world.entity.LightningBolt;
-
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class ModularStaffItem extends Item {
+    private final int SpellSlots;
+    private final int BaseManaCost;
+    private final double CastSpeed;
 
-    public ModularStaffItem(Properties properties) {
+    public ModularStaffItem(Properties properties, int SpellSlots, int BaseManaCost, double CastSpeed) {
         super(properties);
+        this.SpellSlots = SpellSlots;
+        this.BaseManaCost = BaseManaCost;
+        this.CastSpeed = CastSpeed;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack staff = player.getItemInHand(hand);
-        CompoundTag tag = staff.getTag();
+        ItemStack itemstack = player.getItemInHand(hand);
 
-        if (!level.isClientSide() && tag != null && tag.contains("SpellModifiers", Tag.TAG_LIST)) {
-            ListTag modifiers = tag.getList("SpellModifiers", Tag.TAG_COMPOUND);
-
-            boolean hasFireball = false;
-            boolean hasLightning = false;
-            boolean hasSplinter = false;
-            boolean hasSpeedMod = false;
-            boolean isBouncy = false;
-            boolean isSplit = false;
-            boolean hasBeaconLaser = false;
-
-            for (int i = 0; i < modifiers.size(); i++) {
-                CompoundTag modTag = modifiers.getCompound(i);
-                String modId = modTag.getString("id");
-
-                if (modId.equals("minecraftcalamity:fireball_core")) hasFireball = true;
-                if (modId.equals("minecraftcalamity:lightning_core")) hasLightning = true;
-                if (modId.equals("minecraftcalamity:splinter_modifier")) hasSplinter = true;
-                if (modId.equals("minecraftcalamity:speed_modifier")) hasSpeedMod = true;
-                if (modId.equals("minecraftcalamity:bounce_modifier")) isBouncy = true;
-                if (modId.equals("minecraftcalamity:split_modifier")) isSplit = true;
-                if (modId.equals("minecraftcalamity:beacon_laser_core")) hasBeaconLaser = true;
-            }
-
-            // Execute based on Core type
-            if (hasFireball) {
-                castFireball(level, player, tag, hasSpeedMod, isBouncy, isSplit);
-            }
-            if (hasLightning) {
-                castLightning(level, player);
-            }
-            if (hasSplinter) {
-                castSplinter(level, player);
-            }
-
+        // Run your code only on the server side
+        if (!level.isClientSide()) {
+            CastSpell(itemstack, player, level);
         }
 
-        return InteractionResultHolder.sidedSuccess(staff, level.isClientSide());
+        // Return SUCCESS to swing the hand and consume the action
+        return InteractionResultHolder.success(itemstack);
     }
 
-    private void castFireball(Level level, Player player, CompoundTag tag, boolean hasSpeedMod, boolean isBouncy, boolean isSplit) {
-        Vec3 look = player.getLookAngle();
-        int power = tag.contains("Power") ? tag.getInt("Power") : 2;
+    public void CastSpell(ItemStack stack, Player player, Level level) {
+        try {
+            String fullPath = "crab.mods.minecraftcalamity.items.spells.StaffSpells";
+            Class<?> staffClass = Class.forName(fullPath);
+            Object staffInstance = staffClass.getDeclaredConstructor().newInstance();
 
-        double speedMultiplier = hasSpeedMod ? 2.5 : 1.2;
+            Method getSpelldata = staffClass.getMethod("getSpelldata");
+            Method getModifiers = staffClass.getMethod("getModifiers");
 
-        LargeFireball fireball = new LargeFireball(level, player, look.x * speedMultiplier * 0.1, look.y * speedMultiplier * 0.1, look.z * speedMultiplier * 0.1, power);
-        fireball.setPos(player.getX() + look.x * 1.2, player.getEyeY() + look.y * 1.2, player.getZ() + look.z * 1.2);
-        fireball.setDeltaMovement(look.scale(speedMultiplier));
+            Object[][] projectiles = (Object[][]) getSpelldata.invoke(staffInstance);
+            Object[][] modifiers = (Object[][]) getModifiers.invoke(staffInstance);
 
-        // Store modifier properties and calamity weapon tag inside entity persistent data
-        CompoundTag fireballData = fireball.getPersistentData();
-        fireballData.putBoolean("IsCalamityWeaponFireball", true);
+            String foundProjectileId = null;
+            java.util.List<String> activeModifiers = new java.util.ArrayList<>();
+            int totalManaCost = this.BaseManaCost;
+            boolean projectileFoundInSlots = false;
 
-        if (isBouncy) {
-            fireballData.putBoolean("IsBouncy", true);
-            fireballData.putInt("BouncesLeft", 3);
-        }
-        if (isSplit) {
-            fireballData.putBoolean("IsSplit", true);
-            fireballData.putInt("SplitCount", 0); // Tracks total splits up to max 10
+            // 1. Scan all slots to find modifiers and strictly ONE projectile
+            for (int i = 0; i < SpellSlots; i++) {
+                String spellId = getSpellInSlot(stack, i);
+
+                if (spellId == null || spellId.equals("Empty")) {
+                    continue;
+                }
+
+                net.minecraft.resources.ResourceLocation itemKey = new net.minecraft.resources.ResourceLocation("minecraftcalamity", spellId);
+                Item registeredItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemKey);
+
+                if (!(registeredItem instanceof StaffSpellItem spellItem)) {
+                    continue;
+                }
+
+                // Check if it's a projectile
+                boolean isProj = false;
+                int spellCost = 0;
+
+                for (Object[] row : projectiles) {
+                    if (row.length >= 2 && row[0].equals(spellId)) {
+                        spellCost = ((Number) row[1]).intValue();
+                        isProj = true;
+                        break;
+                    }
+                }
+
+                if (isProj) {
+                    if (projectileFoundInSlots) {
+                        player.sendSystemMessage(Component.literal("§cStaff can only hold 1 projectile core!"));
+                        return; // Stop if a projectile was already selected
+                    }
+                    foundProjectileId = spellId;
+                    totalManaCost += spellCost;
+                    projectileFoundInSlots = true;
+                    continue;
+                }
+
+                // Otherwise, check if it's a modifier
+                boolean isMod = false;
+                for (Object[] row : modifiers) {
+                    if (row.length >= 2 && row[0].equals(spellId)) {
+                        spellCost = ((Number) row[1]).intValue();
+                        isMod = true;
+                        break;
+                    }
+                }
+
+                if (isMod) {
+                    activeModifiers.add(spellId);
+                    totalManaCost += spellCost;
+                }
+            }
+
+            // Validate that a projectile actually exists in the staff
+            if (!projectileFoundInSlots || foundProjectileId == null) {
+                player.sendSystemMessage(Component.literal("§cNo projectile spell slotted in staff!"));
+                return;
+            }
+
+            // 2. Handle total combined Mana check and consumption
+            crab.mods.minecraftcalamity.capability.PlayerMana mana = player.getCapability(crab.mods.minecraftcalamity.capability.ManaCapabilityProvider.PLAYER_MANA).orElse(null);
+            if (mana != null) {
+                if (mana.getCurrentMana() < totalManaCost) {
+                    player.sendSystemMessage(Component.literal("§cNot enough mana! Needs " + totalManaCost));
+                    return;
+                }
+                mana.consumeMana(player, totalManaCost);
+            }
+
+            // 3. Apply Modifiers first (pass context or apply effects)
+            for (String modId : activeModifiers) {
+                try {
+                    Method modMethod = staffClass.getMethod(modId, Player.class, Level.class);
+                    modMethod.invoke(staffInstance, player, level);
+                } catch (NoSuchMethodException e) {
+                    // Modifier method optional or missing
+                }
+            }
+
+            // 4. Cast the single main projectile spell
+            try {
+                Method projectileMethod = staffClass.getMethod(foundProjectileId, Player.class, Level.class);
+                projectileMethod.invoke(staffInstance, player, level);
+            } catch (NoSuchMethodException e) {
+                player.sendSystemMessage(Component.literal("§cProjectile method '" + foundProjectileId + "' not implemented!"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void castLightning(Level level, Player player) {
-        Vec3 look = player.getLookAngle();
-        Vec3 targetPos = player.position().add(look.scale(15.0)); // Casts lightning 15 blocks out in gaze direction
-        BlockPos pos = new BlockPos((int) targetPos.x, (int) targetPos.y, (int) targetPos.z);
-
-        LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(level);
-        if (lightning != null && level instanceof ServerLevel serverLevel) {
-            lightning.moveTo(Vec3.atBottomCenterOf(pos));
-            serverLevel.addFreshEntity(lightning);
+    public static void setSpellInSlot(ItemStack stack, int slot, String spellId) {
+        if (stack.hasTag() && slot >= 0 && slot < stack.getOrCreateTag().getInt("SpellSlots")) {
+            net.minecraft.nbt.CompoundTag spellsTag = stack.getOrCreateTag().getCompound("Spells");
+            spellsTag.putString("Slot_" + slot, spellId);
+            stack.getOrCreateTag().put("Spells", spellsTag);
         }
     }
 
-
-
-    private void castSplinter(Level level, Player player) {
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.SPLASH_POTION_BREAK, SoundSource.PLAYERS, 1.0F, 0.5F);
-
-        // Explode a circle of small particles/projectiles around the player
-        int count = 8;
-        double radius = 1.5;
-        for (int i = 0; i < count; i++) {
-            double angle = (2 * Math.PI / count) * i;
-            double dx = Math.cos(angle);
-            double dz = Math.sin(angle);
-
-            // Use SmallFireball instead of LargeFireball so they look like tiny gross projectiles
-            net.minecraft.world.entity.projectile.SmallFireball splinterProj = new net.minecraft.world.entity.projectile.SmallFireball(
-                    level, player, dx * 0.5, 0.0, dz * 0.5
-            );
-
-            splinterProj.setPos(player.getX() + dx * radius, player.getY() + 0.5, player.getZ() + dz * radius);
-            splinterProj.setDeltaMovement(dx * 0.8, 0.1, dz * 0.8);
-
-            // Mark as a sticky splinter projectile
-            CompoundTag data = splinterProj.getPersistentData();
-            data.putBoolean("IsSplinter", true);
-
-            level.addFreshEntity(splinterProj);
+    public static String getSpellInSlot(ItemStack stack, int slot) {
+        if (stack.hasTag() && stack.getTag().contains("Spells")) {
+            net.minecraft.nbt.CompoundTag spellsTag = stack.getTag().getCompound("Spells");
+            String spell = spellsTag.getString("Slot_" + slot);
+            if (!spell.isEmpty()) {
+                return spell;
+            }
         }
+        return "Empty";
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
-        CompoundTag tag = stack.getTag();
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        tooltipComponents.add(Component.literal("§bSpell Slots: " + this.SpellSlots));
+        tooltipComponents.add(Component.literal("§3Base Mana Cost: §f" + this.BaseManaCost));
 
-        int totalSlots = (tag != null && tag.contains("SpellSlots")) ? tag.getInt("SpellSlots") : 2;
-        tooltip.add(Component.literal("§7Available Slots: §b" + totalSlots));
-
-        if (tag != null && tag.contains("SpellModifiers", Tag.TAG_LIST)) {
-            ListTag spells = tag.getList("SpellModifiers", Tag.TAG_COMPOUND);
-            if (!spells.isEmpty()) {
-                tooltip.add(Component.literal("§6Bound Spells:"));
-                for (int i = 0; i < spells.size(); i++) {
-                    CompoundTag spell = spells.getCompound(i);
-                    int slotIndex = spell.getInt("Slot");
-                    String rawId = spell.getString("id");
-
-                    ResourceLocation resLoc = ResourceLocation.tryParse(rawId);
-                    Component spellDisplayName;
-
-                    if (resLoc != null && ForgeRegistries.ITEMS.containsKey(resLoc)) {
-                        Item spellItem = ForgeRegistries.ITEMS.getValue(resLoc);
-                        spellDisplayName = (spellItem != null) ? spellItem.getDescription() : Component.literal(rawId);
-                    } else {
-                        spellDisplayName = Component.literal(rawId);
-                    }
-
-                    tooltip.add(Component.literal("  §8- §7Slot " + slotIndex + ": §f").append(spellDisplayName));
-                }
-            } else {
-                tooltip.add(Component.literal("§7No Spells Bound"));
+        if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
+            tooltipComponents.add(Component.literal("§7--- Spell Slots ---"));
+            for (int i = 0; i < SpellSlots; i++) {
+                String assignedSpell = getSpellInSlot(stack, i);
+                tooltipComponents.add(Component.literal("§7- Slot " + (i + 1) + ": §8" + assignedSpell));
             }
         } else {
-            tooltip.add(Component.literal("§7No Spells Bound"));
+            tooltipComponents.add(Component.literal("§8Hold §7[Shift]§8 for slot details"));
         }
 
-        super.appendHoverText(stack, level, tooltip, isAdvanced);
-    }
-
-    @Override
-    public ItemStack getDefaultInstance() {
-        ItemStack stack = super.getDefaultInstance();
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putInt("SpellSlots", 2);
-        return stack;
+        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
 }
