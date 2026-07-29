@@ -5,12 +5,17 @@ import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.config.CalamityConfig;
+import crab.mods.minecraftcalamity.entity.ModEntityTypes;
+import crab.mods.minecraftcalamity.entity.custom.CaveWizardEntity;
 import crab.mods.minecraftcalamity.items.ModItems;
+import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
 import crab.mods.minecraftcalamity.network.ModMessages;
+import crab.mods.minecraftcalamity.network.SpellCastPacket;
 import crab.mods.minecraftcalamity.network.SyncAccessoriesS2CPacket;
 import crab.mods.minecraftcalamity.recipe.ModRecipes;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -20,6 +25,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -35,6 +41,9 @@ import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 @Mod(MinecraftCalamity.MODID)
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -69,15 +78,16 @@ public class MinecraftCalamity {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModRecipes.register(modEventBus);
-
+        ModEntityTypes.register(modEventBus);
         // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
 
-        // 3. Register Network Channel
+        // 3. Register Network Channel & Messages
         ModMessages.register();
 
-        // 4. Client Setup Listener
+        // 4. Client and Common Setup Listeners
         modEventBus.addListener(this::clientSetup);
+        modEventBus.addListener(this::commonSetup);
 
         // 5. Config Registration
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CalamityConfig.SPEC);
@@ -89,6 +99,17 @@ public class MinecraftCalamity {
     private void clientSetup(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenuTypes.ACCESSORY_MENU.get(), AccessoryScreen::new);
+        });
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            SpawnPlacements.register(
+                    ModEntityTypes.CAVE_WIZARD.get(),
+                    SpawnPlacements.Type.ON_GROUND,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    CaveWizardEntity::checkCaveWizardSpawnRules
+            );
         });
     }
 
@@ -139,5 +160,24 @@ public class MinecraftCalamity {
         player.getCapability(AccessoryCapability.ACCESSORY_CAP).ifPresent(cap -> {
             ModMessages.sendToPlayer(new SyncAccessoriesS2CPacket(cap.serializeNBT()), player);
         });
+    }
+
+    @SubscribeEvent
+    public static void onLeftClickMouse(InputEvent.MouseButton.Pre event) {
+        // Button 0 = Left Click, action 1 = Pressed down
+        if (event.getButton() == 0 && event.getAction() == 1) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null && mc.screen == null) {
+                ItemStack mainHandItem = mc.player.getMainHandItem();
+
+                if (mainHandItem.getItem() instanceof SpellBookItem) {
+                    // Send packet to server to fire the active spell
+                    ModMessages.sendToServer(new SpellCastPacket());
+
+                    // Cancel normal left-click behavior
+                    event.setCanceled(true);
+                }
+            }
+        }
     }
 }

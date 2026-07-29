@@ -38,6 +38,11 @@ public class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.STONE)));
 
+    public static final RegistryObject<Block> PEDESTAL_BLOCK = BLOCKS.register("pedestal",
+            () -> new crab.mods.minecraftcalamity.block.PedestalBlock(Block.Properties.of()
+                    .strength(3.0f, 6.0f)
+                    .noOcclusion()));
+
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
     }

@@ -46,6 +46,14 @@ public class ModMessages {
                 .encoder(SyncAccessoriesS2CPacket::encode)
                 .consumerMainThread(SyncAccessoriesS2CPacket::handle)
                 .add();
+
+        // 4. Spell Cast & Mana Sync Packet (Bidirectional)
+        // Notice: Removed NetworkDirection parameter so it can go C2S and S2C safely
+        net.messageBuilder(SpellCastPacket.class, id())
+                .decoder(SpellCastPacket::new)
+                .encoder(SpellCastPacket::encode)
+                .consumerMainThread(SpellCastPacket::handle)
+                .add();
     }
 
     // Send packet to Server

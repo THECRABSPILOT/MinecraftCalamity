@@ -1,0 +1,18 @@
+{
+  "parent": "item/generated",
+  "loader": "forge:separate_transforms",
+  "base": {
+    "parent": "minecraftcalamity:item/spellbookmodels/spellbookmodel"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "minecraftcalamity:item/librarian_book_2d"
+    },
+    "ground": {
+      "parent": "minecraftcalamity:item/librarian_book_2d"
+    },
+    "fixed": {
+      "parent": "minecraftcalamity:item/librarian_book_2d"
+    }
+  }
+}

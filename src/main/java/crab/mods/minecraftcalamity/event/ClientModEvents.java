@@ -3,22 +3,39 @@ package crab.mods.minecraftcalamity.event;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.client.gui.HellforgeScreen;
 import crab.mods.minecraftcalamity.client.model.CalamititeArmorModel;
+import crab.mods.minecraftcalamity.client.renderer.PedestalBlockEntityRenderer;
 import crab.mods.minecraftcalamity.client.screen.ArcaneWorkbenchScreen;
+import crab.mods.minecraftcalamity.entity.ModEntityTypes;
+import crab.mods.minecraftcalamity.entity.client.CaveWizardModel;
+import crab.mods.minecraftcalamity.entity.client.CaveWizardRenderer;
+import crab.mods.minecraftcalamity.entity.client.DynamicProjectileModel;
+import crab.mods.minecraftcalamity.entity.client.DynamicProjectileRenderer;
 import crab.mods.minecraftcalamity.items.CalamitieArmorItem;
+import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
+
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
@@ -37,12 +54,29 @@ public class ClientModEvents {
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenuTypes.HELLFORGE_MENU.get(), HellforgeScreen::new);
-            // Added Arcane Workbench screen binding:
             MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH_MENU.get(), ArcaneWorkbenchScreen::new);
+
+            // Register Pedestal Block Entity Renderer
+            BlockEntityRenderers.register(
+                    crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.PEDESTAL_BE.get(),
+                    PedestalBlockEntityRenderer::new
+            );
         });
     }
 
-    // 3. Forge Bus Listener for Player Layer Hiding
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(CaveWizardModel.LAYER_LOCATION, CaveWizardModel::createBodyLayer);
+        event.registerLayerDefinition(DynamicProjectileModel.LAYER_LOCATION, DynamicProjectileModel::createBodyLayer);
+    }
+
+    @SubscribeEvent
+    public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntityTypes.CAVE_WIZARD.get(), CaveWizardRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.DYNAMIC_PROJECTILE.get(), DynamicProjectileRenderer::new);
+    }
+
+    // 3. Forge Bus Listener for Player Layer Hiding & Input Events
     @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeClientEvents {
 
@@ -72,5 +106,78 @@ public class ClientModEvents {
                 model.rightPants.visible = false;
             }
         }
+
+        private static int customSpellIndex = 0;
+
+        @SubscribeEvent
+        public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+            Minecraft mc = Minecraft.getInstance();
+            Player player = mc.player;
+
+            if (player == null) return;
+
+            // Check if the player is holding the specific item and actively holding right-click
+            ItemStack mainHandItem = player.getMainHandItem();
+            if (mainHandItem.getItem() instanceof SpellBookItem spellBook && SpellBookItem.isHoldingRightClick()) {
+
+                // Determine scroll direction (positive = up, negative = down)
+                double scrollDelta = event.getScrollDelta();
+                int currentSlot = SpellBookItem.getSelectedSlot(mainHandItem);
+
+                if (scrollDelta > 0) {
+                    currentSlot++;
+                } else if (scrollDelta < 0) {
+                    currentSlot--;
+                }
+
+                // Update the slot using NBT-backed bounds checking from your SpellBookItem class
+                SpellBookItem.setSelectedSlot(mainHandItem, currentSlot, spellBook.getSpellSlots());
+
+                // Display feedback message
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("Selected Spell Slot: " + (SpellBookItem.getSelectedSlot(mainHandItem) + 1)), true);
+
+                // CRITICAL: Cancel the event so the hotbar slot doesn't change
+                event.setCanceled(true);
+            }
+        }
+
+        @SubscribeEvent
+        public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
+            if (event.getOverlay() != VanillaGuiOverlay.HOTBAR.type()) {
+                return;
+            }
+
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null || mc.options.hideGui) {
+                return;
+            }
+
+            Player player = mc.player;
+
+            boolean holdingSpellBook = player.getMainHandItem().getItem() instanceof SpellBookItem
+                    || player.getOffhandItem().getItem() instanceof SpellBookItem;
+
+            if (holdingSpellBook) {
+                player.getCapability(ManaCapabilityProvider.PLAYER_MANA).ifPresent(mana -> {
+                    int currentMana = mana.getCurrentMana();
+                    int maxMana = mana.getMaxMana(player);
+
+                    String text = "Mana: " + currentMana + "/" + maxMana;
+
+                    GuiGraphics graphics = event.getGuiGraphics();
+                    Font font = mc.font;
+
+                    int screenWidth = event.getWindow().getGuiScaledWidth();
+                    int screenHeight = event.getWindow().getGuiScaledHeight();
+                    int textWidth = font.width(text);
+
+                    int x = (screenWidth / 2) - (textWidth / 2);
+                    int y = screenHeight - 55;
+
+                    graphics.drawString(font, text, x, y, 0x55FFFF, true);
+                });
+            }
+        }
+
     }
 }

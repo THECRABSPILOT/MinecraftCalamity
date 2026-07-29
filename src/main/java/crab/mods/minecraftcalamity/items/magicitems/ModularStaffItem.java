@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.items.staves;
+package crab.mods.minecraftcalamity.items.magicitems;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +21,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +47,7 @@ public class ModularStaffItem extends Item {
             boolean hasSpeedMod = false;
             boolean isBouncy = false;
             boolean isSplit = false;
+            boolean hasBeaconLaser = false;
 
             for (int i = 0; i < modifiers.size(); i++) {
                 CompoundTag modTag = modifiers.getCompound(i);
@@ -59,6 +59,7 @@ public class ModularStaffItem extends Item {
                 if (modId.equals("minecraftcalamity:speed_modifier")) hasSpeedMod = true;
                 if (modId.equals("minecraftcalamity:bounce_modifier")) isBouncy = true;
                 if (modId.equals("minecraftcalamity:split_modifier")) isSplit = true;
+                if (modId.equals("minecraftcalamity:beacon_laser_core")) hasBeaconLaser = true;
             }
 
             // Execute based on Core type
@@ -71,6 +72,7 @@ public class ModularStaffItem extends Item {
             if (hasSplinter) {
                 castSplinter(level, player);
             }
+
         }
 
         return InteractionResultHolder.sidedSuccess(staff, level.isClientSide());
@@ -86,8 +88,10 @@ public class ModularStaffItem extends Item {
         fireball.setPos(player.getX() + look.x * 1.2, player.getEyeY() + look.y * 1.2, player.getZ() + look.z * 1.2);
         fireball.setDeltaMovement(look.scale(speedMultiplier));
 
-        // Store modifier properties inside entity persistent data
+        // Store modifier properties and calamity weapon tag inside entity persistent data
         CompoundTag fireballData = fireball.getPersistentData();
+        fireballData.putBoolean("IsCalamityWeaponFireball", true);
+
         if (isBouncy) {
             fireballData.putBoolean("IsBouncy", true);
             fireballData.putInt("BouncesLeft", 3);
@@ -96,11 +100,6 @@ public class ModularStaffItem extends Item {
             fireballData.putBoolean("IsSplit", true);
             fireballData.putInt("SplitCount", 0); // Tracks total splits up to max 10
         }
-
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.GHAST_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F);
-
-        level.addFreshEntity(fireball);
     }
 
     private void castLightning(Level level, Player player) {
@@ -115,11 +114,13 @@ public class ModularStaffItem extends Item {
         }
     }
 
+
+
     private void castSplinter(Level level, Player player) {
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.SPLASH_POTION_BREAK, SoundSource.PLAYERS, 1.0F, 0.5F);
 
-        // Explode a circle of projectiles around the player (e.g., 8 projectiles in a ring)
+        // Explode a circle of small particles/projectiles around the player
         int count = 8;
         double radius = 1.5;
         for (int i = 0; i < count; i++) {
@@ -127,7 +128,11 @@ public class ModularStaffItem extends Item {
             double dx = Math.cos(angle);
             double dz = Math.sin(angle);
 
-            LargeFireball splinterProj = new LargeFireball(level, player, dx * 0.5, 0.0, dz * 0.5, 1);
+            // Use SmallFireball instead of LargeFireball so they look like tiny gross projectiles
+            net.minecraft.world.entity.projectile.SmallFireball splinterProj = new net.minecraft.world.entity.projectile.SmallFireball(
+                    level, player, dx * 0.5, 0.0, dz * 0.5
+            );
+
             splinterProj.setPos(player.getX() + dx * radius, player.getY() + 0.5, player.getZ() + dz * radius);
             splinterProj.setDeltaMovement(dx * 0.8, 0.1, dz * 0.8);
 

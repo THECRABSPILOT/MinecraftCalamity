@@ -2,7 +2,10 @@ package crab.mods.minecraftcalamity.items;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
-import crab.mods.minecraftcalamity.items.staves.ModularStaffItem;
+import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
+import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
+import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
+import crab.mods.minecraftcalamity.items.magicitems.UniqueBooks.MonsterBookItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -10,7 +13,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-
 
 
 public class ModItems {
@@ -41,6 +43,9 @@ public class ModItems {
     public static final RegistryObject<Item> HELLFORGE = ITEMS.register("hellforge",
             () -> new BlockItem(ModBlocks.HELLFORGE.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> PEDESTAL = ITEMS.register("pedestal",
+            () -> new BlockItem(ModBlocks.PEDESTAL_BLOCK.get(), new Item.Properties()));
+
     public static final RegistryObject<Item> ARCANE_WORKBENCH = ITEMS.register("arcane_workbench",
             () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
 
@@ -49,7 +54,7 @@ public class ModItems {
                     .stacksTo(1)
             ));
 
-//SPELLS
+//STAFF SPELLS
 
     public static final RegistryObject<Item> FIREBALL_CORE = ITEMS.register("fireball_core",
             () -> new Item(new Item.Properties()));
@@ -69,6 +74,7 @@ public class ModItems {
     public static final RegistryObject<Item> SPLIT_MODIFER = ITEMS.register("split_modifier",
             () -> new Item(new Item.Properties()));
 
+
     // ARMOR
     public static final RegistryObject<Item> CALAMITITE_HELMET = ITEMS.register("calamitite_helmet",
             () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.HELMET, new Item.Properties()));
@@ -81,6 +87,31 @@ public class ModItems {
 
     public static final RegistryObject<Item> CALAMITITE_BOOTS = ITEMS.register("calamitite_boots",
             () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()));
+
+
+
+
+    //SpellBooks
+
+    public static final RegistryObject<Item> LIBRARIAN_BOOK = ITEMS.register("librarian_book",
+            () -> new SpellBookItem(new Item.Properties().stacksTo(1), 6));
+
+    public static final RegistryObject<Item> CARNIVOUROUS_GRIMOIRE = ITEMS.register("carniverous_grimoire",
+            () -> new MonsterBookItem(new Item.Properties().stacksTo(1), 6));
+
+
+    //BOOK SPELLS
+
+    //FIRE
+    public static final RegistryObject<Item> FIRE_FLIGHT = ITEMS.register("fire_flight",
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+
+    public static final RegistryObject<Item> FIREBALL = ITEMS.register("fireball",
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+
+
+
+
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
