@@ -43,9 +43,7 @@ public class KeyBindings {
                     if (Minecraft.getInstance().player != null) {
 
                         // 1. Send chat message to player (Client-side)
-                        Minecraft.getInstance().player.sendSystemMessage(
-                                Component.literal("Opening Accessory Menu...")
-                        );
+
 
                         // 2. Send packet to server to open the screen
                         ModMessages.sendToServer(new OpenAccessoryMenuC2SPacket());

@@ -10,6 +10,21 @@
   "block.minecraftcalamity.calamitite_ore": "Calamitite Ore",
   "item.minecraftcalamity.calamitite_scrap": "Calamitite Scrap",
   "creativetab.minecraftcalamity.tab": "Minecraft Calamity",
-  "item.minecraftcalamity.calaitite_ingot": "Calamitite Ingot"
-
+  "item.minecraftcalamity.calamitite_ingot": "Calamitite Ingot",
+ "block.minecraftcalamity.pedestal": "Pedestal",
+ "block.minecraftcalamity.arcane_workbench": "Arcane Workbench",
+  "item.minecraftcalamity.wooden_staff": "Wooden Staff",
+  "item.minecraftcalamity.fireball_core": "Fireball Core",
+  "item.minecraftcalamity.bounce_modifier": "Bounce Modifier",
+  "item.minecraftcalamity.lightning_core": "Lightning Core",
+  "item.minecraftcalamity.split_modifier": "Split Modifier",
+  "item.minecraftcalamity.calamitite_helmet": "Calamitite Helmet",
+  "item.minecraftcalamity.calamitite_chestplate": "Calamitite Chestplate",
+  "item.minecraftcalamity.calamitite_leggings": "Calamitite Leggings",
+  "item.minecraftcalamity.calamitite_boots": "Calamitite Boots",
+  "item.minecraftcalamity.librarian_book": "Librarian Book",
+  "item.minecraftcalamity.carniverous_grimoire": "Carnivorous  Grimoire",
+  "item.minecraftcalamity.fire_flight": "Fire  Flight Spell",
+  "item.minecraftcalamity.fireball": "Fireball Spell",
+  "item.minecraftcalamity.mana_star": "Mana Star"
 }

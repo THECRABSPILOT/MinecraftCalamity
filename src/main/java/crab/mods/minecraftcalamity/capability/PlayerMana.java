@@ -1,7 +1,9 @@
 package crab.mods.minecraftcalamity.capability;
 
+import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class PlayerMana {
     private int currentMana = 100;
@@ -18,8 +20,23 @@ public class PlayerMana {
     public int getMaxMana(Player player) {
         int bonusMana = 0;
         if (player != null) {
-            // Future Armor Loop Hooks:
-            // for (ItemStack armor : player.getArmorSlots()) { ... }
+            // Check accessory capability slots for Mana Star using its item tag
+            bonusMana += player.getCapability(crab.mods.minecraftcalamity.accessory.AccessoryCapability.ACCESSORY_CAP)
+                    .map(cap -> {
+                        int count = 0;
+                        var inv = cap.getInventory();
+                        for (int slot = 0; slot < inv.getSlots(); slot++) {
+                            ItemStack stack = inv.getStackInSlot(slot);
+                            // Checks if the equipped accessory is part of your mana star/accessory definition
+                            if (stack.is(AccessoryMenu.ACCESSORIES_TAG)) {
+                                // If you want specifically the Mana Star to give mana, check its registry name string instead:
+                                if (stack.getItem().getDescriptionId().contains("mana_star")) {
+                                    count++;
+                                }
+                            }
+                        }
+                        return count * 50;
+                    }).orElse(0);
         }
         return this.baseMaxMana + bonusMana;
     }
@@ -27,7 +44,7 @@ public class PlayerMana {
     public boolean consumeMana(Player player, int amount) {
         if (this.currentMana >= amount) {
             this.currentMana -= amount;
-            this.sync(player); // <--- AUTOMATIC CAST SYNC HOOK
+            this.sync(player);
             return true;
         }
         return false;
@@ -35,7 +52,7 @@ public class PlayerMana {
 
     public void regenMana(Player player, int amount) {
         this.currentMana = Math.min(getMaxMana(player), this.currentMana + amount);
-        this.sync(player); // <--- AUTOMATIC REGEN SYNC HOOK
+        this.sync(player);
     }
 
     public void saveNBT(CompoundTag tag) {

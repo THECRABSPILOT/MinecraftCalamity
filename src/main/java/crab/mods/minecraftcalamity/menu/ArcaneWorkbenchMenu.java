@@ -20,7 +20,9 @@ import net.minecraftforge.items.SlotItemHandler;
 public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
     public static final TagKey<Item> STAFF_TAG = ItemTags.create(new ResourceLocation("minecraftcalamity", "staff"));
-    public static final TagKey<Item> CORE_TAG = ItemTags.create(new ResourceLocation("minecraftcalamity", "spellcore"));
+    public static final TagKey<Item> BOOK_TAG = ItemTags.create(new ResourceLocation("minecraftcalamity", "spellbook"));
+    public static final TagKey<Item> STAFF_SPELL_TAG = ItemTags.create(new ResourceLocation("minecraftcalamity", "staffspell"));
+    public static final TagKey<Item> BOOK_SPELL_TAG = ItemTags.create(new ResourceLocation("minecraftcalamity", "bookspell"));
 
     public final ArcaneWorkbenchBlockEntity blockEntity;
 
@@ -34,24 +36,30 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
         this.blockEntity = (ArcaneWorkbenchBlockEntity) entity;
 
         this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            // 0: Input Staff Slot (Shifted: -4X, +6Y)
-            this.addSlot(new SlotItemHandler(handler, 0, 16, 26) {
+            // 0: Input Magic Item Slot (Staff or SpellBook)
+            this.addSlot(new SlotItemHandler(handler, 0, 20, 24) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return stack.is(STAFF_TAG);
+                    return stack.is(STAFF_TAG) || stack.is(BOOK_TAG);
                 }
             });
 
-            // 1: Core / Inscription Scroll Slot (Shifted: -4X, +6Y)
-            this.addSlot(new SlotItemHandler(handler, 1, 16, 56) {
+            // 1: Spell / Scroll Slot
+            this.addSlot(new SlotItemHandler(handler, 1, 20, 48) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    return stack.is(CORE_TAG);
+                    ItemStack containerItem = handler.getStackInSlot(0);
+                    if (containerItem.is(STAFF_TAG)) {
+                        return stack.is(STAFF_SPELL_TAG);
+                    } else if (containerItem.is(BOOK_TAG)) {
+                        return stack.is(BOOK_SPELL_TAG);
+                    }
+                    return stack.is(STAFF_SPELL_TAG) || stack.is(BOOK_SPELL_TAG);
                 }
             });
 
-            // 2: Output Slot (Shifted: +4Y)
-            this.addSlot(new SlotItemHandler(handler, 2, 140, 39) {
+            // 2: Output Slot -> Previous Y: 32, X: 144. Moved down 1 (32 + 1 = 33), left 1 (144 - 1 = 143)
+            this.addSlot(new SlotItemHandler(handler, 2, 143, 33) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return false;
@@ -64,7 +72,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
                 }
             });
 
-            // 3-11: Dynamic Spell Modifier Slots
+            // 3-11: Dynamic Spell Modifier / Slot Grid
             int modGridX = 58;
             int modGridY = 22;
             for (int row = 0; row < 3; row++) {
@@ -80,7 +88,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
                         @Override
                         public boolean mayPlace(ItemStack stack) {
-                            return false; // Dynamic grid click assignment
+                            return false;
                         }
                     });
                 }
@@ -93,23 +101,15 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
 
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        System.out.println("[DEBUG-MENU] Clicked Slot ID: " + slotId + " | Button: " + button + " | Type: " + clickType + " | Side: " + (player.level().isClientSide() ? "CLIENT" : "SERVER"));
-
         if (slotId >= 3 && slotId <= 11) {
             int modifierIndex = slotId - 3;
             int activeSlots = blockEntity.getAvailableSpellSlots();
-            System.out.println("[DEBUG-MENU] Grid Slot Clicked (" + modifierIndex + "). Active Staff Slots: " + activeSlots);
 
             if (modifierIndex < activeSlots) {
                 if (!player.level().isClientSide()) {
-                    System.out.println("[DEBUG-MENU] Calling handleModifierSlotClick on Server...");
                     blockEntity.handleModifierSlotClick(slotId);
-                } else {
-                    System.out.println("[DEBUG-MENU] Ignored on Client (handled on Server).");
                 }
                 return;
-            } else {
-                System.out.println("[DEBUG-MENU] Slot index " + modifierIndex + " is locked/inactive!");
             }
         }
 
@@ -153,11 +153,11 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else {
-                if (stackInSlot.is(STAFF_TAG)) {
+                if (stackInSlot.is(STAFF_TAG) || stackInSlot.is(BOOK_TAG)) {
                     if (!this.moveItemStackTo(stackInSlot, 0, 1, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (stackInSlot.is(CORE_TAG)) {
+                } else if (stackInSlot.is(STAFF_SPELL_TAG) || stackInSlot.is(BOOK_SPELL_TAG)) {
                     if (!this.moveItemStackTo(stackInSlot, 1, 2, false)) {
                         return ItemStack.EMPTY;
                     }

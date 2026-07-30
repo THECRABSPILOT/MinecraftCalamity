@@ -24,12 +24,8 @@ public class ModItems {
     public static final RegistryObject<Item> CALAMITITE_ORE = ITEMS.register("calamitite_ore",
             () -> new BlockItem(ModBlocks.CALAMITITE_ORE.get(), new Item.Properties()));
 
-    // Template Test Accessory Registration
-    public static final RegistryObject<Item> TEST_ACCESSORY = ITEMS.register("test_accessory",
-            () -> new TestAccessoryItem(new Item.Properties().stacksTo(1)));
 
-    public static final RegistryObject<Item> CLOUD_IN_A_JAR = ITEMS.register("cloud_in_a_jar",
-            () -> new CloudInAJar(new Item.Properties().stacksTo(1)));
+
 
     // MATERIALS
     public static final RegistryObject<Item> CALAMITITE_SCRAP = ITEMS.register("calamitite_scrap",
@@ -106,6 +102,16 @@ public class ModItems {
 
 
 
+    //ACCESSORIES
+    public static final RegistryObject<Item> MANA_STAR = ITEMS.register("mana_star",
+            () -> new Item(new Item.Properties()));
+
+
+    public static final RegistryObject<Item> TEST_ACCESSORY = ITEMS.register("test_accessory",
+            () -> new TestAccessoryItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> CLOUD_IN_A_JAR = ITEMS.register("cloud_in_a_jar",
+            () -> new CloudInAJar(new Item.Properties().stacksTo(1)));
 
 
     public static void register(IEventBus eventBus) {

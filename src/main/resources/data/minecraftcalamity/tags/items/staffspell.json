@@ -2,9 +2,7 @@
   "replace": false,
   "values": [
     "minecraftcalamity:fireball_core",
-    "minecraftcalamity:speed_modifier",
     "minecraftcalamity:bounce_modifier",
-    "minecraftcalamity:splinter_modifier",
     "minecraftcalamity:split_modifier",
     "minecraftcalamity:lightning_core"
   ]

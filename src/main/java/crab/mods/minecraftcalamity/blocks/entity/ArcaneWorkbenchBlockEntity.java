@@ -1,5 +1,7 @@
 package crab.mods.minecraftcalamity.blocks.entity;
 
+import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
+import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.ArcaneWorkbenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,7 +18,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -27,30 +28,28 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static crab.mods.minecraftcalamity.menu.ArcaneWorkbenchMenu.STAFF_TAG;
-
 public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvider {
-
-    public enum OutputAction {
-        NONE,
-        ADD_SPELL,
-        REMOVE_SPELL
-    }
-
-    private OutputAction currentAction = OutputAction.NONE;
-    private int targetModifierIndex = -1;
 
     private final ItemStackHandler itemHandler = new ItemStackHandler(12) {
         @Override
         protected void onContentsChanged(int slot) {
+            if (slot == 0 || slot == 1) {
+                ItemStack output = getStackInSlot(2);
+                if (!output.isEmpty()) {
+                    setStackInSlot(2, ItemStack.EMPTY);
+                    isAddingSpell = false;
+                }
+            }
             setChanged();
         }
     };
 
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
 
+    // Flag to track whether we are adding a spell or extracting one
+    private boolean isAddingSpell = false;
+
     public ArcaneWorkbenchBlockEntity(BlockPos pos, BlockState state) {
-        // Replace with your actual BlockEntityType registry object if needed
         super(ModBlockEntities.ARCANE_WORKBENCH_BE.get(), pos, state);
     }
 
@@ -86,116 +85,101 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
     }
 
     public int getAvailableSpellSlots() {
-        ItemStack staff = itemHandler.getStackInSlot(0);
-        if (!staff.isEmpty() && staff.hasTag() && staff.getTag().contains("SpellSlots")) {
-            return staff.getTag().getInt("SpellSlots");
+        ItemStack item = itemHandler.getStackInSlot(0);
+        if (!item.isEmpty()) {
+            if (item.hasTag() && item.getTag().contains("SpellSlots")) {
+                return item.getTag().getInt("SpellSlots");
+            }
+            if (item.getItem() instanceof ModularStaffItem) {
+                return 2;
+            }
+            if (item.getItem() instanceof SpellBookItem book) {
+                return book.getSpellSlots();
+            }
         }
         return 0;
     }
 
     public void handleModifierSlotClick(int clickedSlotIndex) {
         int modifierIndex = clickedSlotIndex - 3;
-        ItemStack staffInput = itemHandler.getStackInSlot(0);
-        ItemStack coreInput = itemHandler.getStackInSlot(1);
-
-        System.out.println("==================================================");
-        System.out.println("[DEBUG-BE] Clicked Raw Slot Index: " + clickedSlotIndex);
-        System.out.println("[DEBUG-BE] Target Modifier Index: " + modifierIndex);
-        System.out.println("[DEBUG-BE] Staff in Slot 0: " + (staffInput.isEmpty() ? "EMPTY" : staffInput.getDisplayName().getString()));
-        System.out.println("[DEBUG-BE] Core in Slot 1: " + (coreInput.isEmpty() ? "EMPTY" : coreInput.getDisplayName().getString()));
+        ItemStack magicItemInput = itemHandler.getStackInSlot(0);
+        ItemStack spellInput = itemHandler.getStackInSlot(1);
 
         int availableSlots = getAvailableSpellSlots();
-        System.out.println("[DEBUG-BE] Available Staff Spell Slots: " + availableSlots);
 
-        if (staffInput.isEmpty()) {
-            System.out.println("[DEBUG-BE] CANCELLED: Slot 0 is empty!");
-            System.out.println("==================================================");
+        if (magicItemInput.isEmpty() || modifierIndex >= availableSlots) {
             return;
         }
 
-        if (modifierIndex >= availableSlots) {
-            System.out.println("[DEBUG-BE] CANCELLED: Clicked index (" + modifierIndex + ") exceeds available slots (" + availableSlots + ")");
-            System.out.println("==================================================");
-            return;
-        }
-
-        // SCENARIO 1: Staff + Core Present -> Assign Spell
-        if (!coreInput.isEmpty()) {
-            System.out.println("[DEBUG-BE] Running SCENARIO 1: Adding/Replacing Spell...");
-            ItemStack moddedStaff = staffInput.copy();
-            CompoundTag tag = moddedStaff.getOrCreateTag();
+        // SCENARIO 1: Assign Spell (Preview Staff with new spell in Output Slot 2)
+        if (!spellInput.isEmpty()) {
+            isAddingSpell = true;
+            ItemStack modifiedItem = magicItemInput.copy();
+            CompoundTag tag = modifiedItem.getOrCreateTag();
 
             ListTag spells = tag.contains("SpellModifiers", 9) ? tag.getList("SpellModifiers", 10) : new ListTag();
-            System.out.println("[DEBUG-BE] Pre-existing Spells Count: " + spells.size());
 
-            // Remove duplicates/old entries in this slot
             for (int i = spells.size() - 1; i >= 0; i--) {
                 if (spells.getCompound(i).getInt("Slot") == modifierIndex) {
-                    System.out.println("[DEBUG-BE] Found existing spell at slot " + modifierIndex + ", removing old NBT...");
                     spells.remove(i);
                 }
             }
 
-            ResourceLocation coreId = ForgeRegistries.ITEMS.getKey(coreInput.getItem());
-            System.out.println("[DEBUG-BE] Core Item ResourceLocation: " + coreId);
-
-            if (coreId != null) {
+            ResourceLocation spellIdKey = ForgeRegistries.ITEMS.getKey(spellInput.getItem());
+            if (spellIdKey != null) {
                 CompoundTag spellTag = new CompoundTag();
-                spellTag.putString("id", coreId.toString());
+                spellTag.putString("id", spellIdKey.toString());
                 spellTag.putInt("Slot", modifierIndex);
 
                 spells.add(spellTag);
                 tag.put("SpellModifiers", spells);
 
-                System.out.println("[DEBUG-BE] Updated Staff NBT: " + tag);
+                CompoundTag spellsTag = tag.contains("Spells", 10) ? tag.getCompound("Spells") : new CompoundTag();
+                spellsTag.putString("Slot_" + modifierIndex, spellIdKey.getPath());
+                tag.put("Spells", spellsTag);
 
-                itemHandler.setStackInSlot(2, moddedStaff);
-                this.currentAction = OutputAction.ADD_SPELL;
-                this.targetModifierIndex = modifierIndex;
-                System.out.println("[DEBUG-BE] Output Slot 2 updated with modded staff!");
-            } else {
-                System.err.println("[DEBUG-BE] ERROR: Core item ResourceLocation is NULL!");
+                // Place preview into output slot 2
+                itemHandler.setStackInSlot(2, modifiedItem);
+                setChanged();
             }
         }
-        // SCENARIO 2: Staff Only -> Extract Spell
+        // SCENARIO 2: Extract Spell (Put ONLY the extracted Spell item in Output Slot 2, and update Slot 0 in-place)
         else {
-            System.out.println("[DEBUG-BE] Running SCENARIO 2: Extracting Spell...");
-            CompoundTag tag = staffInput.getTag();
-            System.out.println("[DEBUG-BE] Raw Staff Tag: " + tag);
-
+            isAddingSpell = false;
+            CompoundTag tag = magicItemInput.getTag();
             if (tag != null && tag.contains("SpellModifiers", 9)) {
                 ListTag spells = tag.getList("SpellModifiers", 10);
-                boolean spellFound = false;
-
                 for (int i = 0; i < spells.size(); i++) {
                     CompoundTag spellTag = spells.getCompound(i);
-                    int slotInTag = spellTag.getInt("Slot");
-                    System.out.println("[DEBUG-BE] Checking NBT list item [" + i + "] -> Slot: " + slotInTag + " | ID: " + spellTag.getString("id"));
-
-                    if (slotInTag == modifierIndex) {
+                    if (spellTag.getInt("Slot") == modifierIndex) {
                         ResourceLocation spellId = new ResourceLocation(spellTag.getString("id"));
                         Item spellItem = ForgeRegistries.ITEMS.getValue(spellId);
-                        System.out.println("[DEBUG-BE] Found matching spell! Resolved Item: " + (spellItem != null ? spellItem.getDescriptionId() : "NULL"));
 
                         if (spellItem != null) {
+                            // 1. Put ONLY the extracted spell item into Output Slot 2
                             itemHandler.setStackInSlot(2, new ItemStack(spellItem));
-                            this.currentAction = OutputAction.REMOVE_SPELL;
-                            this.targetModifierIndex = modifierIndex;
-                            spellFound = true;
-                            System.out.println("[DEBUG-BE] Placed extracted core into Output Slot 2!");
+
+                            // 2. Modify Slot 0's item directly (remove the spell from its NBT) without moving it out of Slot 0
+                            CompoundTag modTag = magicItemInput.getOrCreateTag();
+                            ListTag newSpells = new ListTag();
+                            for (int j = 0; j < spells.size(); j++) {
+                                if (j != i) {
+                                    newSpells.add(spells.getCompound(j).copy());
+                                }
+                            }
+                            modTag.put("SpellModifiers", newSpells);
+
+                            if (modTag.contains("Spells", 10)) {
+                                modTag.getCompound("Spells").remove("Slot_" + modifierIndex);
+                            }
+
+                            setChanged();
                         }
                         break;
                     }
                 }
-
-                if (!spellFound) {
-                    System.out.println("[DEBUG-BE] No spell bound to slot index " + modifierIndex + " found in NBT!");
-                }
-            } else {
-                System.out.println("[DEBUG-BE] Staff has no 'SpellModifiers' NBT tag!");
             }
         }
-        System.out.println("==================================================");
     }
 
     public void onTakeOutput(Player player) {
@@ -203,65 +187,29 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
             return;
         }
 
-        System.out.println("==================================================");
-        System.out.println("[DEBUG-BE] onTakeOutput triggered on SERVER by: " + player.getName().getString());
-        System.out.println("[DEBUG-BE] Current Action State: " + this.currentAction);
-        System.out.println("[DEBUG-BE] Target Modifier Index: " + this.targetModifierIndex);
+        ItemStack spellInput = itemHandler.getStackInSlot(1);
 
-        if (currentAction == OutputAction.ADD_SPELL) {
-            ItemStack coreStack = itemHandler.getStackInSlot(1);
-            ItemStack staffInput = itemHandler.getStackInSlot(0);
-
-            if (!coreStack.isEmpty() && !staffInput.isEmpty()) {
-                // 1. Capture the Core ID before shrinking
-                ResourceLocation coreId = ForgeRegistries.ITEMS.getKey(coreStack.getItem());
-
-                // 2. Shrink/Consume 1 Core from Slot 1
-                coreStack.shrink(1);
-                itemHandler.setStackInSlot(1, coreStack);
-
-                // 3. Consume/Delete the old staff in Slot 0 (since it's being upgraded into the new one)
-                staffInput.shrink(1);
-                itemHandler.setStackInSlot(0, staffInput);
-
-                // 4. Put the newly upgraded staff DIRECTLY into the player's cursor / inventory,
-                // or drop it into slot 0 if you prefer it to stay in the workbench inventory.
-                // Usually, crafting outputs give the item directly to the player or slot 2 preview.
-                // Let's build the final upgraded staff and place it into Slot 0 (or let Slot 2 handle it):
-                if (coreId != null) {
-                    ItemStack upgradedStaff = itemHandler.getStackInSlot(2).copy();
-                    // If slot 2 preview has it, use it directly! Otherwise build it:
-                    if (upgradedStaff.isEmpty() || !upgradedStaff.is(STAFF_TAG)) {
-                        // Fallback build if slot 2 was empty
-                        upgradedStaff = staffInput.copy(); // Wait, staffInput was shrunk, so snapshot it earlier!
-                    }
-                }
+        if (isAddingSpell) {
+            // When adding a spell, consume the input staff/book (slot 0) and the spell core (slot 1)
+            ItemStack magicInput = itemHandler.getStackInSlot(0);
+            if (!magicInput.isEmpty()) {
+                magicInput.shrink(1);
+                itemHandler.setStackInSlot(0, magicInput);
             }
-
-            // Clear output slot preview
-            itemHandler.setStackInSlot(2, ItemStack.EMPTY);
-
-        } else if (currentAction == OutputAction.REMOVE_SPELL) {
-            ItemStack staff = itemHandler.getStackInSlot(0);
-
-            if (staff.hasTag() && staff.getTag().contains("SpellModifiers", 9)) {
-                ListTag spells = staff.getTag().getList("SpellModifiers", 10);
-                for (int i = 0; i < spells.size(); i++) {
-                    if (spells.getCompound(i).getInt("Slot") == targetModifierIndex) {
-                        spells.remove(i);
-                        break;
-                    }
-                }
+            if (!spellInput.isEmpty()) {
+                spellInput.shrink(1);
+                itemHandler.setStackInSlot(1, spellInput);
             }
-            itemHandler.setStackInSlot(2, ItemStack.EMPTY);
+        } else {
+            // When extracting a spell, Slot 0 was already updated in-place. We do NOT consume the staff/book.
+            // We just let the player take their extracted spell out of slot 2.
         }
 
-        this.currentAction = OutputAction.NONE;
-        this.targetModifierIndex = -1;
+        itemHandler.setStackInSlot(2, ItemStack.EMPTY);
+        isAddingSpell = false;
         setChanged();
-        System.out.println("[DEBUG-BE] Action completed and state reset.");
-        System.out.println("==================================================");
     }
+
     public void drops() {
         SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
         for (int i = 0; i < itemHandler.getSlots(); i++) {
@@ -272,13 +220,17 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
 
     @Override
     protected void saveAdditional(CompoundTag nbt) {
-        nbt.put("inventory", itemHandler.serializeNBT());
         super.saveAdditional(nbt);
+        nbt.put("inventory", itemHandler.serializeNBT());
+        nbt.putBoolean("IsAddingSpell", isAddingSpell);
     }
 
     @Override
     public void load(CompoundTag nbt) {
         super.load(nbt);
         itemHandler.deserializeNBT(nbt.getCompound("inventory"));
+        if (nbt.contains("IsAddingSpell")) {
+            isAddingSpell = nbt.getBoolean("IsAddingSpell");
+        }
     }
 }

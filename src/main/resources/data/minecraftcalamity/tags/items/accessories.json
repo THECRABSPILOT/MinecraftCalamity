@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "minecraftcalamity:test_accessory",
-    "minecraftcalamity:cloud_in_a_jar"
+    "minecraftcalamity:cloud_in_a_jar",
+    "minecraftcalamity:mana_star"
   ]
 }

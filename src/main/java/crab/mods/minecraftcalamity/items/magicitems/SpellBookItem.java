@@ -2,6 +2,7 @@ package crab.mods.minecraftcalamity.items.magicitems;
 
 import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
 import crab.mods.minecraftcalamity.capability.PlayerMana;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -26,6 +27,23 @@ public class SpellBookItem extends Item {
         this.SpellSlots = SpellSlots;
     }
 
+    @Override
+    public void verifyTagAfterLoad(CompoundTag nbt) {
+        super.verifyTagAfterLoad(nbt);
+        if (!nbt.contains("SpellSlots")) {
+            nbt.putInt("SpellSlots", this.SpellSlots);
+        }
+    }
+
+    @Override
+    public CompoundTag getShareTag(ItemStack stack) {
+        CompoundTag nbt = super.getShareTag(stack);
+        if (nbt != null && !nbt.contains("SpellSlots")) {
+            nbt.putInt("SpellSlots", this.SpellSlots);
+        }
+        return nbt;
+    }
+
     public int getSpellSlots() {
         return this.SpellSlots;
     }
@@ -43,9 +61,15 @@ public class SpellBookItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (!stack.getOrCreateTag().contains("SpellSlots")) {
+            stack.getTag().putInt("SpellSlots", this.SpellSlots);
+        }
 
         if (level.isClientSide()) {
             isHoldingRightClick = true;
+        } else {
+            // Server-side: Cast the active spell immediately on right-click!
+            castActiveSpell(stack, player, level);
         }
 
         player.startUsingItem(hand);
@@ -78,14 +102,15 @@ public class SpellBookItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        int maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : this.SpellSlots;
         String activeSpell = getSpellInSlot(stack, getSelectedSlot(stack));
 
-        tooltipComponents.add(Component.literal("§bSpell Slots: " + this.SpellSlots));
+        tooltipComponents.add(Component.literal("§bSpell Slots: " + maxSlots));
         tooltipComponents.add(Component.literal("§eSelected Spell: §f" + activeSpell));
 
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             tooltipComponents.add(Component.literal("§7--- Spell Slots ---"));
-            for (int i = 0; i < SpellSlots; i++) {
+            for (int i = 0; i < maxSlots; i++) {
                 String assignedSpell = getSpellInSlot(stack, i);
 
                 if (i == getSelectedSlot(stack)) {
@@ -102,16 +127,18 @@ public class SpellBookItem extends Item {
     }
 
     public static void setSpellInSlot(ItemStack stack, int slot, String spellId) {
-        if (stack.hasTag() && slot >= 0 && slot < stack.getOrCreateTag().getInt("SpellSlots")) {
-            net.minecraft.nbt.CompoundTag spellsTag = stack.getOrCreateTag().getCompound("Spells");
+        CompoundTag tag = stack.getOrCreateTag();
+        int maxSlots = tag.contains("SpellSlots") ? tag.getInt("SpellSlots") : 0;
+        if (slot >= 0 && slot < maxSlots) {
+            CompoundTag spellsTag = tag.getCompound("Spells");
             spellsTag.putString("Slot_" + slot, spellId);
-            stack.getOrCreateTag().put("Spells", spellsTag);
+            tag.put("Spells", spellsTag);
         }
     }
 
     public static String getSpellInSlot(ItemStack stack, int slot) {
         if (stack.hasTag() && stack.getTag().contains("Spells")) {
-            net.minecraft.nbt.CompoundTag spellsTag = stack.getTag().getCompound("Spells");
+            CompoundTag spellsTag = stack.getTag().getCompound("Spells");
             String spell = spellsTag.getString("Slot_" + slot);
             if (!spell.isEmpty()) {
                 return spell;

@@ -3,6 +3,7 @@ package crab.mods.minecraftcalamity.items.magicitems;
 import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
 import crab.mods.minecraftcalamity.capability.PlayerMana;
 import crab.mods.minecraftcalamity.items.spells.StaffSpells;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,15 +30,35 @@ public class ModularStaffItem extends Item {
     }
 
     @Override
+    public void verifyTagAfterLoad(CompoundTag nbt) {
+        super.verifyTagAfterLoad(nbt);
+        if (!nbt.contains("SpellSlots")) {
+            nbt.putInt("SpellSlots", this.SpellSlots);
+        }
+    }
+
+    @Override
+    public CompoundTag getShareTag(ItemStack stack) {
+        CompoundTag nbt = super.getShareTag(stack);
+        if (nbt != null && !nbt.contains("SpellSlots")) {
+            nbt.putInt("SpellSlots", this.SpellSlots);
+        }
+        return nbt;
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        // Run your code only on the server side
+        // Ensure NBT exists on use if spawned via commands/creative
+        if (!itemstack.getOrCreateTag().contains("SpellSlots")) {
+            itemstack.getTag().putInt("SpellSlots", this.SpellSlots);
+        }
+
         if (!level.isClientSide()) {
             CastSpell(itemstack, player, level);
         }
 
-        // Return SUCCESS to swing the hand and consume the action
         return InteractionResultHolder.success(itemstack);
     }
 
@@ -58,8 +79,9 @@ public class ModularStaffItem extends Item {
             int totalManaCost = this.BaseManaCost;
             boolean projectileFoundInSlots = false;
 
-            // 1. Scan all slots to find modifiers and strictly ONE projectile
-            for (int i = 0; i < SpellSlots; i++) {
+            int maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : this.SpellSlots;
+
+            for (int i = 0; i < maxSlots; i++) {
                 String spellId = getSpellInSlot(stack, i);
 
                 if (spellId == null || spellId.equals("Empty")) {
@@ -73,7 +95,6 @@ public class ModularStaffItem extends Item {
                     continue;
                 }
 
-                // Check if it's a projectile
                 boolean isProj = false;
                 int spellCost = 0;
 
@@ -87,8 +108,7 @@ public class ModularStaffItem extends Item {
 
                 if (isProj) {
                     if (projectileFoundInSlots) {
-                        player.sendSystemMessage(Component.literal("§cStaff can only hold 1 projectile core!"));
-                        return; // Stop if a projectile was already selected
+                        return;
                     }
                     foundProjectileId = spellId;
                     totalManaCost += spellCost;
@@ -96,7 +116,6 @@ public class ModularStaffItem extends Item {
                     continue;
                 }
 
-                // Otherwise, check if it's a modifier
                 boolean isMod = false;
                 for (Object[] row : modifiers) {
                     if (row.length >= 2 && row[0].equals(spellId)) {
@@ -112,14 +131,11 @@ public class ModularStaffItem extends Item {
                 }
             }
 
-            // Validate that a projectile actually exists in the staff
             if (!projectileFoundInSlots || foundProjectileId == null) {
-                player.sendSystemMessage(Component.literal("§cNo projectile spell slotted in staff!"));
                 return;
             }
 
-            // 2. Handle total combined Mana check and consumption
-            crab.mods.minecraftcalamity.capability.PlayerMana mana = player.getCapability(crab.mods.minecraftcalamity.capability.ManaCapabilityProvider.PLAYER_MANA).orElse(null);
+            PlayerMana mana = player.getCapability(ManaCapabilityProvider.PLAYER_MANA).orElse(null);
             if (mana != null) {
                 if (mana.getCurrentMana() < totalManaCost) {
                     player.sendSystemMessage(Component.literal("§cNot enough mana! Needs " + totalManaCost));
@@ -128,17 +144,15 @@ public class ModularStaffItem extends Item {
                 mana.consumeMana(player, totalManaCost);
             }
 
-            // 3. Apply Modifiers first (pass context or apply effects)
             for (String modId : activeModifiers) {
                 try {
                     Method modMethod = staffClass.getMethod(modId, Player.class, Level.class);
                     modMethod.invoke(staffInstance, player, level);
                 } catch (NoSuchMethodException e) {
-                    // Modifier method optional or missing
+                    // Modifier method optional
                 }
             }
 
-            // 4. Cast the single main projectile spell
             try {
                 Method projectileMethod = staffClass.getMethod(foundProjectileId, Player.class, Level.class);
                 projectileMethod.invoke(staffInstance, player, level);
@@ -152,16 +166,18 @@ public class ModularStaffItem extends Item {
     }
 
     public static void setSpellInSlot(ItemStack stack, int slot, String spellId) {
-        if (stack.hasTag() && slot >= 0 && slot < stack.getOrCreateTag().getInt("SpellSlots")) {
-            net.minecraft.nbt.CompoundTag spellsTag = stack.getOrCreateTag().getCompound("Spells");
+        CompoundTag tag = stack.getOrCreateTag();
+        int maxSlots = tag.contains("SpellSlots") ? tag.getInt("SpellSlots") : 0;
+        if (slot >= 0 && slot < maxSlots) {
+            CompoundTag spellsTag = tag.getCompound("Spells");
             spellsTag.putString("Slot_" + slot, spellId);
-            stack.getOrCreateTag().put("Spells", spellsTag);
+            tag.put("Spells", spellsTag);
         }
     }
 
     public static String getSpellInSlot(ItemStack stack, int slot) {
         if (stack.hasTag() && stack.getTag().contains("Spells")) {
-            net.minecraft.nbt.CompoundTag spellsTag = stack.getTag().getCompound("Spells");
+            CompoundTag spellsTag = stack.getTag().getCompound("Spells");
             String spell = spellsTag.getString("Slot_" + slot);
             if (!spell.isEmpty()) {
                 return spell;
@@ -172,12 +188,13 @@ public class ModularStaffItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("§bSpell Slots: " + this.SpellSlots));
+        int maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : this.SpellSlots;
+        tooltipComponents.add(Component.literal("§bSpell Slots: " + maxSlots));
         tooltipComponents.add(Component.literal("§3Base Mana Cost: §f" + this.BaseManaCost));
 
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             tooltipComponents.add(Component.literal("§7--- Spell Slots ---"));
-            for (int i = 0; i < SpellSlots; i++) {
+            for (int i = 0; i < maxSlots; i++) {
                 String assignedSpell = getSpellInSlot(stack, i);
                 tooltipComponents.add(Component.literal("§7- Slot " + (i + 1) + ": §8" + assignedSpell));
             }

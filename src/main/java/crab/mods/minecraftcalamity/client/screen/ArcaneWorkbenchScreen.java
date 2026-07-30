@@ -6,9 +6,13 @@ import crab.mods.minecraftcalamity.menu.ArcaneWorkbenchMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkbenchMenu> {
 
@@ -47,7 +51,32 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
         for (int i = 0; i < activeSlots; i++) {
             int row = i / 3;
             int col = i % 3;
-            guiGraphics.blit(TEXTURE, modGridX + (col * 18), modGridY + (row * 18), slotTextureU, slotTextureV, 18, 18);
+            int slotX = modGridX + (col * 18);
+            int slotY = modGridY + (row * 18);
+
+            // Draw slot background box
+            guiGraphics.blit(TEXTURE, slotX, slotY, slotTextureU, slotTextureV, 18, 18);
+        }
+
+        // 4. Render assigned spell item icons inside the modifier slots if present in the staff's NBT
+        ItemStack staffStack = this.menu.getSlot(0).getItem();
+        if (!staffStack.isEmpty() && staffStack.hasTag() && staffStack.getTag().contains("Spells")) {
+            CompoundTag spellsTag = staffStack.getTag().getCompound("Spells");
+
+            for (int i = 0; i < activeSlots; i++) {
+                String spellId = spellsTag.getString("Slot_" + i);
+                if (!spellId.isEmpty() && !spellId.equals("Empty")) {
+                    Item spellItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation("minecraftcalamity", spellId));
+                    if (spellItem != null) {
+                        int row = i / 3;
+                        int col = i % 3;
+                        int slotX = modGridX + (col * 18) + 1; // +1 to center inside 18x18 slot box
+                        int slotY = modGridY + (row * 18) + 1;
+
+                        guiGraphics.renderItem(new ItemStack(spellItem), slotX, slotY);
+                    }
+                }
+            }
         }
     }
 

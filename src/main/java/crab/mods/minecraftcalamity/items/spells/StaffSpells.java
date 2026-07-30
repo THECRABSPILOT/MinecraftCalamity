@@ -44,7 +44,7 @@ public class StaffSpells {
     public void bounce_modifier(Player player, Level level) {
         if (!level.isClientSide()) {
             bounceModifierActive = true;
-            player.sendSystemMessage(Component.literal("§e[Modifier] Bounce Applied!"));
+
         }
     }
 
@@ -63,9 +63,7 @@ public class StaffSpells {
             if (bounceModifierActive) {
                 // Register for 3 bounces dynamically inside this class handler
                 bouncingFireballs.put(fireball, 3);
-                player.sendSystemMessage(Component.literal("§c(Bouncing) Fireball Launched!"));
-            } else {
-                player.sendSystemMessage(Component.literal("§cFireball Launched!"));
+
             }
 
             level.addFreshEntity(fireball);
