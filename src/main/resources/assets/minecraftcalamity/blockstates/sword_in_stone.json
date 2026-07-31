@@ -1,0 +1,8 @@
+{
+  "render_type": "minecraft:cutout",
+  "variants": {
+    "": {
+      "model": "minecraftcalamity:block/sword_in_stone"
+    }
+  }
+}

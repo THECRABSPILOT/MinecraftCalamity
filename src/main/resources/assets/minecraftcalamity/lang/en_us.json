@@ -14,9 +14,9 @@
  "block.minecraftcalamity.pedestal": "Pedestal",
  "block.minecraftcalamity.arcane_workbench": "Arcane Workbench",
   "item.minecraftcalamity.wooden_staff": "Wooden Staff",
-  "item.minecraftcalamity.fireball_core": "Fireball Core",
+  "item.minecraftcalamity.fireball_core": "§6Fireball Core",
   "item.minecraftcalamity.bounce_modifier": "Bounce Modifier",
-  "item.minecraftcalamity.lightning_core": "Lightning Core",
+  "item.minecraftcalamity.lightning_core": "§3Lightning Core",
   "item.minecraftcalamity.split_modifier": "Split Modifier",
   "item.minecraftcalamity.calamitite_helmet": "Calamitite Helmet",
   "item.minecraftcalamity.calamitite_chestplate": "Calamitite Chestplate",
@@ -24,7 +24,11 @@
   "item.minecraftcalamity.calamitite_boots": "Calamitite Boots",
   "item.minecraftcalamity.librarian_book": "Librarian Book",
   "item.minecraftcalamity.carniverous_grimoire": "Carnivorous  Grimoire",
-  "item.minecraftcalamity.fire_flight": "Fire  Flight Spell",
-  "item.minecraftcalamity.fireball": "Fireball Spell",
-  "item.minecraftcalamity.mana_star": "Mana Star"
+  "item.minecraftcalamity.fire_flight": "§6Fire  Flight Spell",
+  "item.minecraftcalamity.fireball": "§6Fireball Spell",
+  "item.minecraftcalamity.mana_star": "§1Mana Star",
+  "item.minecraftcalamity.enchanted_sword": "§5Enchanted Sword",
+  "item.minecraftcalamity.botched_enchanted_sword": "§5Enchanted Sword",
+  "block.minecraftcalamity.sword_in_stone": "Sword In Stone",
+  "item.minecraftcalamity.cross_ring": "§eCross Ring"
 }

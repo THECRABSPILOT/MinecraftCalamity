@@ -6,10 +6,7 @@ import crab.mods.minecraftcalamity.client.model.CalamititeArmorModel;
 import crab.mods.minecraftcalamity.client.renderer.PedestalBlockEntityRenderer;
 import crab.mods.minecraftcalamity.client.screen.ArcaneWorkbenchScreen;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
-import crab.mods.minecraftcalamity.entity.client.CaveWizardModel;
-import crab.mods.minecraftcalamity.entity.client.CaveWizardRenderer;
-import crab.mods.minecraftcalamity.entity.client.DynamicProjectileModel;
-import crab.mods.minecraftcalamity.entity.client.DynamicProjectileRenderer;
+import crab.mods.minecraftcalamity.entity.client.*;
 import crab.mods.minecraftcalamity.items.CalamitieArmorItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
@@ -17,6 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -37,6 +36,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 
+import static crab.mods.minecraftcalamity.blocks.ModBlocks.SWORD_IN_STONE;
+
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
 
@@ -56,7 +57,10 @@ public class ClientModEvents {
             MenuScreens.register(ModMenuTypes.HELLFORGE_MENU.get(), HellforgeScreen::new);
             MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH_MENU.get(), ArcaneWorkbenchScreen::new);
 
-            // Register Pedestal Block Entity Renderer
+            if (SWORD_IN_STONE != null && SWORD_IN_STONE.get() != null) {
+                ItemBlockRenderTypes.setRenderLayer(SWORD_IN_STONE.get(), RenderType.cutout());
+            }
+
             BlockEntityRenderers.register(
                     crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.PEDESTAL_BE.get(),
                     PedestalBlockEntityRenderer::new
@@ -64,16 +68,19 @@ public class ClientModEvents {
         });
     }
 
+
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(CaveWizardModel.LAYER_LOCATION, CaveWizardModel::createBodyLayer);
         event.registerLayerDefinition(DynamicProjectileModel.LAYER_LOCATION, DynamicProjectileModel::createBodyLayer);
+        event.registerLayerDefinition(SwordModel.LAYER_LOCATION, SwordModel::createBodyLayer); // Add this line
     }
 
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.CAVE_WIZARD.get(), CaveWizardRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.DYNAMIC_PROJECTILE.get(), DynamicProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.SWORD_PROJECTILE.get(), SwordProjectileRenderer::new);
     }
 
     // 3. Forge Bus Listener for Player Layer Hiding & Input Events

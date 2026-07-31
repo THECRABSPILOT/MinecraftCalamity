@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    " X ",
+    " S "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "X": {
+      "item": "minecraft:diamond_sword"
+    },
+    "S": {
+      "item": "minecraftcalamity:mana_star"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:botched_enchanted_sword",
+    "count": 1
+  }
+}

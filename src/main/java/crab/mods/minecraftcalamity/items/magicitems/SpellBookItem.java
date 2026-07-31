@@ -69,7 +69,7 @@ public class SpellBookItem extends Item {
             isHoldingRightClick = true;
         } else {
             // Server-side: Cast the active spell immediately on right-click!
-            castActiveSpell(stack, player, level);
+           //castActiveSpell(stack, player, level);
         }
 
         player.startUsingItem(hand);

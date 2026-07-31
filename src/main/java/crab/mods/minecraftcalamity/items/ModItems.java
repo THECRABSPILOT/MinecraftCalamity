@@ -7,9 +7,7 @@ import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
 import crab.mods.minecraftcalamity.items.magicitems.StaffSpellItem;
 import crab.mods.minecraftcalamity.items.magicitems.UniqueBooks.MonsterBookItem;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -104,14 +102,30 @@ public class ModItems {
 
     //ACCESSORIES
     public static final RegistryObject<Item> MANA_STAR = ITEMS.register("mana_star",
-            () -> new Item(new Item.Properties()));
+            () -> new AccessoryItem(new Item.Properties().stacksTo(1),"§7Increases Max mana by 50"));
 
+    public static final RegistryObject<Item> CROSS_RING = ITEMS.register("cross_ring",
+            () -> new AccessoryItem(new Item.Properties().stacksTo(1),"§7Grants Immunity to wither"));
 
     public static final RegistryObject<Item> TEST_ACCESSORY = ITEMS.register("test_accessory",
             () -> new TestAccessoryItem(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> CLOUD_IN_A_JAR = ITEMS.register("cloud_in_a_jar",
             () -> new CloudInAJar(new Item.Properties().stacksTo(1)));
+
+
+
+    //WEAPONS
+
+    public static final RegistryObject<Item> ENCHANTED_SWORD = ITEMS.register("enchanted_sword",
+            () -> new EnchantedSwordItem(Tiers.DIAMOND, 13, -2.4f, new Item.Properties(),"§7Does this make ME the king?"));
+
+    public static final RegistryObject<Item> BOTCHED_ENCHANTED_SWORD = ITEMS.register("botched_enchanted_sword",
+            () -> new EnchantedSwordItem(Tiers.DIAMOND, 10, -2.4f, new Item.Properties(),"§7Fraudulence. The work of man will never outdo the gods."));
+
+//blocks
+    public static final RegistryObject<Item> SWORD_IN_STONE = ITEMS.register("sword_in_stone",
+            () -> new BlockItem(ModBlocks.SWORD_IN_STONE.get(), new Item.Properties()));
 
 
     public static void register(IEventBus eventBus) {

@@ -3,6 +3,7 @@ package crab.mods.minecraftcalamity.entity;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.entity.custom.CaveWizardEntity;
 import crab.mods.minecraftcalamity.entity.custom.DynamicProjectileEntity;
+import crab.mods.minecraftcalamity.entity.custom.SwordProjectileEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -28,6 +29,14 @@ public class ModEntityTypes {
                             .clientTrackingRange(4)
                             .updateInterval(10)
                             .build("dynamic_projectile"));
+
+    public static final RegistryObject<EntityType<SwordProjectileEntity>> SWORD_PROJECTILE =
+            ENTITY_TYPES.register("sword_projectile", () ->
+                    EntityType.Builder.<SwordProjectileEntity>of(SwordProjectileEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F) // Adjust hitbox size as needed
+                            .clientTrackingRange(4)
+                            .updateInterval(10)
+                            .build("sword_projectile"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
