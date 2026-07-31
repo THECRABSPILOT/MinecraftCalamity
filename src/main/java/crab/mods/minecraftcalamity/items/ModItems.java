@@ -121,7 +121,7 @@ public class ModItems {
             () -> new EnchantedSwordItem(Tiers.DIAMOND, 13, -2.4f, new Item.Properties(),"§7Does this make ME the king?"));
 
     public static final RegistryObject<Item> BOTCHED_ENCHANTED_SWORD = ITEMS.register("botched_enchanted_sword",
-            () -> new EnchantedSwordItem(Tiers.DIAMOND, 10, -2.4f, new Item.Properties(),"§7Fraudulence. The work of man will never outdo the gods."));
+            () -> new EnchantedSwordItem(Tiers.DIAMOND, 10, -2.4f, new Item.Properties(),"§7Feels off."));
 
 //blocks
     public static final RegistryObject<Item> SWORD_IN_STONE = ITEMS.register("sword_in_stone",
