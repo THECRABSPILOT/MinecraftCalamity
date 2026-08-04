@@ -127,23 +127,29 @@ public class ClientModEvents {
             ItemStack mainHandItem = player.getMainHandItem();
             if (mainHandItem.getItem() instanceof SpellBookItem spellBook && SpellBookItem.isHoldingRightClick()) {
 
-                // Determine scroll direction (positive = up, negative = down)
+                // Determine scroll direction
                 double scrollDelta = event.getScrollDelta();
                 int currentSlot = SpellBookItem.getSelectedSlot(mainHandItem);
+                int maxSlots = spellBook.getSpellSlots();
 
                 if (scrollDelta > 0) {
-                    currentSlot++;
+                    currentSlot = (currentSlot + 1) % maxSlots; // Wraps around automatically
                 } else if (scrollDelta < 0) {
-                    currentSlot--;
+                    currentSlot = (currentSlot - 1 + maxSlots) % maxSlots; // Wraps around backwards
                 }
 
-                // Update the slot using NBT-backed bounds checking from your SpellBookItem class
-                SpellBookItem.setSelectedSlot(mainHandItem, currentSlot, spellBook.getSpellSlots());
+                // 1. Update Client-side NBT for fast UI response
+                SpellBookItem.setSelectedSlot(mainHandItem, currentSlot, maxSlots);
 
-                // Display feedback message
+
+                crab.mods.minecraftcalamity.network.ModMessages.INSTANCE.sendToServer(
+                        new crab.mods.minecraftcalamity.network.ChangeSpellSlotPacket(currentSlot)
+                );
+
+                // 3. Display feedback message
                 player.displayClientMessage(net.minecraft.network.chat.Component.literal("Selected Spell Slot: " + (SpellBookItem.getSelectedSlot(mainHandItem) + 1)), true);
 
-                // CRITICAL: Cancel the event so the hotbar slot doesn't change
+                // 4. Cancel hotbar change
                 event.setCanceled(true);
             }
         }

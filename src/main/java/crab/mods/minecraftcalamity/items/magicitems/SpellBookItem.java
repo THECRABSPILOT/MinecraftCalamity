@@ -93,6 +93,10 @@ public class SpellBookItem extends Item {
     }
 
     public static void setSelectedSlot(ItemStack stack, int slot, int maxSlots) {
+        // Prevent Division/Min clamp bugs if maxSlots is 0 or unassigned
+        if (maxSlots <= 0) {
+            maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : 1;
+        }
         int clampedSlot = Math.max(0, Math.min(slot, maxSlots - 1));
         stack.getOrCreateTag().putInt("SelectedSlot", clampedSlot);
     }

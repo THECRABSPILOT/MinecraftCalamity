@@ -109,4 +109,10 @@ public class VillagerSpells {
             }
         }
     }
+
+    public void heal(Player player, Level level) {
+        if (!player.level().isClientSide()) {
+            player.setHealth(player.getMaxHealth());
+        }
+    }
 }

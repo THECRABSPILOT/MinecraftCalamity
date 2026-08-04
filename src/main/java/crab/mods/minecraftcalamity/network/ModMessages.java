@@ -9,7 +9,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModMessages {
-    private static SimpleChannel INSTANCE;
+    public static SimpleChannel INSTANCE;
     private static int packetId = 0;
 
     private static int id() {
@@ -53,6 +53,13 @@ public class ModMessages {
                 .decoder(SpellCastPacket::new)
                 .encoder(SpellCastPacket::encode)
                 .consumerMainThread(SpellCastPacket::handle)
+                .add();
+
+
+        INSTANCE.messageBuilder(ChangeSpellSlotPacket.class, id())
+                .encoder(ChangeSpellSlotPacket::encode)
+                .decoder(ChangeSpellSlotPacket::new)
+                .consumerMainThread(ChangeSpellSlotPacket::handle)
                 .add();
     }
 

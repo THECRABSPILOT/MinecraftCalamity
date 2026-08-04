@@ -3,7 +3,9 @@
   "values": [
     "minecraftcalamity:fireball",
     "minecraftcalamity:fire_flight",
-    "minecraftcalamity:incinerate",
-    "minecraftcalamity:summon_golem"
+    "minecraftcalamity:infernal_column",
+
+    "minecraftcalamity:summon_golem",
+    "minecraftcalamity:heal"
   ]
 }
