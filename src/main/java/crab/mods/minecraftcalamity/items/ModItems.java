@@ -98,6 +98,12 @@ public class ModItems {
     public static final RegistryObject<Item> FIREBALL = ITEMS.register("fireball",
             () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
 
+    public static final RegistryObject<Item> INCINERATE = ITEMS.register("incinerate",
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+    //village
+    public static final RegistryObject<Item> SUMMON_GOLEM = ITEMS.register("summon_golem",
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "VillagerSpells"));
+
 
 
     //ACCESSORIES

@@ -36,4 +36,5 @@ public class ModEvents {
                 net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE
         );
     }
+
 }

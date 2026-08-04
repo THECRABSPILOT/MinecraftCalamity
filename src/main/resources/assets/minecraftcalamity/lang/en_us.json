@@ -30,5 +30,9 @@
   "item.minecraftcalamity.enchanted_sword": "§5Enchanted Sword",
   "item.minecraftcalamity.botched_enchanted_sword": "§5Enchanted Sword",
   "block.minecraftcalamity.sword_in_stone": "Sword In Stone",
-  "item.minecraftcalamity.cross_ring": "§eCross Ring"
+  "item.minecraftcalamity.cross_ring": "§eCross Ring",
+  "effect.minecraftcalamity.mana_regen": "Mana Regeneration",
+  "item.minecraft.potion.effect.mana_brew": "Mana Brew",
+  "item.minecraft.splash_potion.effect.mana_brew": "Splash Mana Brew",
+  "item.minecraft.linerging_potion.effect.mana_brew": "Linerging Mana Brew"
 }

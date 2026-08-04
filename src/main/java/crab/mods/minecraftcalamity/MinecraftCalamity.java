@@ -5,10 +5,12 @@ import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.config.CalamityConfig;
+import crab.mods.minecraftcalamity.effect.ModEffects;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
 import crab.mods.minecraftcalamity.entity.custom.CaveWizardEntity;
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
+import crab.mods.minecraftcalamity.items.potion.ModPotions;
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
 import crab.mods.minecraftcalamity.network.ModMessages;
@@ -21,12 +23,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -69,8 +71,7 @@ public class MinecraftCalamity {
 
     public MinecraftCalamity(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
-
-        // 1. Register Deferred Registers
+        //so many registers broo i need to merge a few at some point
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
@@ -79,17 +80,16 @@ public class MinecraftCalamity {
         ModBlockEntities.register(modEventBus);
         ModRecipes.register(modEventBus);
         ModEntityTypes.register(modEventBus);
-        // 2. Register Mod Class Modules
         ModMenuTypes.register(modEventBus);
-
-        // 3. Register Network Channel & Messages
+        ModEffects.register(modEventBus);
+        ModPotions.register(modEventBus);
         ModMessages.register();
 
-        // 4. Client and Common Setup Listeners
+
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::commonSetup);
 
-        // 5. Config Registration
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CalamityConfig.SPEC);
 
         // 6. Register Forge Event Bus
@@ -178,6 +178,27 @@ public class MinecraftCalamity {
                     event.setCanceled(true);
                 }
             }
+        }
+    }
+
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        // Check if the current tab being built is the vanilla Food & Drinks tab
+        if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
+
+            // 1. Create a regular potion itemstack and apply your custom potion registry object
+            ItemStack regularPotion = new ItemStack(Items.POTION);
+            PotionUtils.setPotion(regularPotion, ModPotions.MANA_BREW.get());
+            event.accept(regularPotion);
+
+            // 2. Create a splash potion itemstack
+            ItemStack splashPotion = new ItemStack(Items.SPLASH_POTION);
+            PotionUtils.setPotion(splashPotion, ModPotions.MANA_BREW.get());
+            event.accept(splashPotion);
+
+            // 3. Create a lingering potion itemstack
+            ItemStack lingeringPotion = new ItemStack(Items.LINGERING_POTION);
+            PotionUtils.setPotion(lingeringPotion, ModPotions.MANA_BREW.get());
+            event.accept(lingeringPotion);
         }
     }
 }

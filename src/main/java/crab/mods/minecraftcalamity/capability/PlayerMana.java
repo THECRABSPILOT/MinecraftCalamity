@@ -1,5 +1,6 @@
 package crab.mods.minecraftcalamity.capability;
 
+import crab.mods.minecraftcalamity.effect.ModEffects;
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -51,9 +52,15 @@ public class PlayerMana {
     }
 
     public void regenMana(Player player, int amount) {
-        this.currentMana = Math.min(getMaxMana(player), this.currentMana + amount);
+        // Replace ModEffects.MANA_REGEN with your actual registered MobEffect instance
+        if (player != null && player.hasEffect(ModEffects.MANA_REGEN.get())) {
+            this.currentMana = Math.min(getMaxMana(player), this.currentMana + 10);
+        } else {
+            this.currentMana = Math.min(getMaxMana(player), this.currentMana + amount);
+        }
         this.sync(player);
     }
+
 
     public void saveNBT(CompoundTag tag) {
         tag.putInt("CurrentMana", currentMana);
