@@ -16,7 +16,7 @@ public class TimeBomb extends MobEffect {
         if (!pLivingEntity.level().isClientSide()) {
             var effectInstance = pLivingEntity.getEffect(this);
 
-            if (effectInstance != null && effectInstance.getDuration() == 20 && !pLivingEntity.isDeadOrDying()) {
+            if (effectInstance != null && effectInstance.getDuration() == 1 && !pLivingEntity.isDeadOrDying()) {
                 Level level = pLivingEntity.level();
 
                 float explosionRadius = 3.0f + (pAmplifier * 1.5f);

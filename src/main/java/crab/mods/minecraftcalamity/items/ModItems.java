@@ -140,6 +140,9 @@ public class ModItems {
     public static final RegistryObject<Item> IRON_DRILL = ITEMS.register("iron_drill",
             () -> new DrillItem(Tiers.IRON, 1, -2.8F, 3, new Item.Properties()));
 
+    public static final RegistryObject<Item> LARGE_BOTTLE = ITEMS.register("large_bottle",
+            () -> new LargeBottleItem(new Item.Properties()));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

@@ -8,11 +8,10 @@ import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 
 public class DrillItem extends PickaxeItem {
     private final int radius;
+    private static boolean isAoeMining = false;
 
     public DrillItem(Tier tier, int attackDamageModifier, float attackSpeedModifier, int radius, Properties properties) {
         super(tier, attackDamageModifier, attackSpeedModifier, properties);
@@ -21,11 +20,15 @@ public class DrillItem extends PickaxeItem {
 
     @Override
     public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner) {
-        if (!level.isClientSide() && state.getDestroySpeed(level, pos) != 0.0F) {
-            HitResult hit = miner.pick(5.0D, 0.0F, false);
-            if (hit.getType() == HitResult.Type.BLOCK && hit instanceof BlockHitResult blockHit) {
-                Direction face = blockHit.getDirection();
-                breakExtraBlocks(level, pos, face, miner, stack);
+        if (!level.isClientSide() && state.getDestroySpeed(level, pos) != 0.0F && !isAoeMining) {
+            Direction face = Direction.orderedByNearest(miner)[0];
+            if (face != null) {
+                isAoeMining = true;
+                try {
+                    breakExtraBlocks(level, pos, face, miner, stack);
+                } finally {
+                    isAoeMining = false;
+                }
             }
         }
         return super.mineBlock(stack, level, state, pos, miner);
@@ -33,24 +36,26 @@ public class DrillItem extends PickaxeItem {
 
     private void breakExtraBlocks(Level level, BlockPos centerPos, Direction face, LivingEntity miner, ItemStack stack) {
         int offset = radius / 2;
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-
-        int minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
+        int minX = -offset, maxX = offset;
+        int minY = -offset, maxY = offset;
+        int minZ = -offset, maxZ = offset;
 
         switch (face) {
             case DOWN, UP -> {
-                minX = -offset; maxX = offset;
-                minZ = -offset; maxZ = offset;
+                minY = 0;
+                maxY = 0;
             }
             case NORTH, SOUTH -> {
-                minX = -offset; maxX = offset;
-                minY = -offset; maxY = offset;
+                minZ = 0;
+                maxZ = 0;
             }
             case WEST, EAST -> {
-                minY = -offset; maxY = offset;
-                minZ = -offset; maxZ = offset;
+                minX = 0;
+                maxX = 0;
             }
         }
+
+        int blocksBroken = 0;
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
@@ -58,17 +63,25 @@ public class DrillItem extends PickaxeItem {
                     if (x == 0 && y == 0 && z == 0) continue;
                     if (stack.isEmpty()) return;
 
-                    mutablePos.set(centerPos.getX() + x, centerPos.getY() + y, centerPos.getZ() + z);
-                    BlockState targetState = level.getBlockState(mutablePos);
+                    BlockPos targetPos = centerPos.offset(x, y, z);
+                    BlockState targetState = level.getBlockState(targetPos);
 
-                    if (!targetState.isAir() && targetState.getDestroySpeed(level, mutablePos) >= 0.0F) {
-                        if (isCorrectToolForDrops(stack, targetState)) {
-                            level.destroyBlock(mutablePos, true, miner);
-                            stack.hurtAndBreak(1, miner, (entity) -> entity.broadcastBreakEvent(miner.getUsedItemHand()));
-                        }
+                    if (!targetState.isAir() && targetState.getDestroySpeed(level, targetPos) >= 0.0F) {
+                        level.destroyBlock(targetPos, true, miner);
+                        blocksBroken++;
                     }
                 }
             }
         }
+
+        if (blocksBroken > 0) {
+            stack.hurtAndBreak(1, miner, (entity) -> entity.broadcastBreakEvent(miner.getUsedItemHand()));
+        }
+    }
+
+    @Override
+    public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+        // Returning true here suppresses the default arm-swing animation entirely when using/swinging the item
+        return true;
     }
 }
