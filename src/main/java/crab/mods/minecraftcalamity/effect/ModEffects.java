@@ -15,6 +15,9 @@ public class ModEffects {
 public static final RegistryObject<MobEffect> MANA_REGEN = MOB_EFFECTS.register("mana_regen",
         () -> new ManaRegen(MobEffectCategory.NEUTRAL, 0x001aff));
 
+    public static final RegistryObject<MobEffect> TIME_BOMB = MOB_EFFECTS.register("time_bomb",
+            () -> new TimeBomb(MobEffectCategory.NEUTRAL, 0x53ed7c));
+
     public static void register(IEventBus eventBus) {
         MOB_EFFECTS.register(eventBus);
     }

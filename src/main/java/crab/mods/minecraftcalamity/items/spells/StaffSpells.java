@@ -1,7 +1,7 @@
 package crab.mods.minecraftcalamity.items.spells;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
@@ -9,7 +9,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -19,16 +18,30 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StaffSpells {
 
     private static boolean bounceModifierActive = false;
+    private static boolean splitModifierActive = false;
 
-    // Track active bouncing fireballs and their remaining bounce counts
-    private static final ConcurrentHashMap<LargeFireball, Integer> bouncingFireballs = new ConcurrentHashMap<>();
+    // Helper class to store individual entity bounce state and split capability
+    private static class TrackerData {
+        int bouncesLeft;
+        boolean canSplit;
+
+        TrackerData(int bouncesLeft, boolean canSplit) {
+            this.bouncesLeft = bouncesLeft;
+            this.canSplit = canSplit;
+        }
+    }
+
+    // Track bouncing/splitting entities
+    private static final ConcurrentHashMap<Entity, TrackerData> trackedEntities = new ConcurrentHashMap<>();
 
     private final Object[][] projectiles = {
             {"fireball_core", 5},
+
     };
 
     private final Object[][] modifiers = {
             {"bounce_modifier", 5},
+            {"split_modifier", 5}
     };
 
     public Object[][] getSpelldata() {
@@ -44,7 +57,12 @@ public class StaffSpells {
     public void bounce_modifier(Player player, Level level) {
         if (!level.isClientSide()) {
             bounceModifierActive = true;
+        }
+    }
 
+    public void split_modifier(Player player, Level level) {
+        if (!level.isClientSide()) {
+            splitModifierActive = true;
         }
     }
 
@@ -61,17 +79,20 @@ public class StaffSpells {
             fireball.setPos(spawnX, spawnY, spawnZ);
 
             if (bounceModifierActive) {
-                // Register for 3 bounces dynamically inside this class handler
-                bouncingFireballs.put(fireball, 3);
-
+                trackedEntities.put(fireball, new TrackerData(3, splitModifierActive));
             }
 
             level.addFreshEntity(fireball);
-            bounceModifierActive = false;
+            resetModifiers();
         }
     }
 
-    // --- ENTIRELY SELF-CONTAINED BOUNCE ENGINE (TICK EVENT) ---
+
+
+    private static void resetModifiers() {
+        bounceModifierActive = false;
+        splitModifierActive = false;
+    }
 
     @SubscribeEvent
     public static void onEntityTick(TickEvent.LevelTickEvent event) {
@@ -79,36 +100,33 @@ public class StaffSpells {
             return;
         }
 
-        if (bouncingFireballs.isEmpty()) {
+        if (trackedEntities.isEmpty()) {
             return;
         }
 
-        Iterator<Map.Entry<LargeFireball, Integer>> iterator = bouncingFireballs.entrySet().iterator();
+        Iterator<Map.Entry<Entity, TrackerData>> iterator = trackedEntities.entrySet().iterator();
         while (iterator.hasNext()) {
-            InjectorGroupInfo.Map.Entry<LargeFireball, Integer> entry = iterator.next();
-            LargeFireball fireball = entry.getKey();
-            int bouncesLeft = entry.getValue();
+            Map.Entry<Entity, TrackerData> entry = iterator.next();
+            Entity entity = entry.getKey();
+            TrackerData data = entry.getValue();
 
-            if (fireball == null || !fireball.isAlive() || bouncesLeft <= 0) {
+            if (entity == null || !entity.isAlive() || data.bouncesLeft <= 0) {
                 iterator.remove();
                 continue;
             }
 
-            // Check if the fireball collided horizontally or vertically via delta movement changes
-            Vec3 deltaMovement = fireball.getDeltaMovement();
-            boolean bounced = false;
+            Vec3 position = entity.position();
+            Vec3 motion = entity.getDeltaMovement();
 
-            // Simple velocity inversion simulation upon hitting blocks/obstacles
-            Vec3 position = fireball.position();
-            if (!event.level.noCollision(fireball, fireball.getBoundingBox().inflate(0.1))) {
-                Vec3 motion = fireball.getDeltaMovement();
+            if (!event.level.noCollision(entity, entity.getBoundingBox().inflate(0.1))) {
                 double newX = motion.x;
                 double newY = motion.y;
                 double newZ = motion.z;
+                boolean bounced = false;
 
-                // Detect axis obstruction and reverse vector component for a clean bounce
+                // Detect axis collisions
                 if (event.level.getBlockState(BlockPos.containing(position.x + motion.x, position.y, position.z)).isSolid()) {
-                    newX = -motion.x * 0.8; // 80% energy retention bounce
+                    newX = -motion.x * 0.8;
                     bounced = true;
                 }
                 if (event.level.getBlockState(BlockPos.containing(position.x, position.y + motion.y, position.z)).isSolid()) {
@@ -121,14 +139,45 @@ public class StaffSpells {
                 }
 
                 if (bounced) {
-                    fireball.setDeltaMovement(newX, newY, newZ);
-                    entry.setValue(bouncesLeft - 1);
+                    Vec3 reboundedVelocity = new Vec3(newX, newY, newZ);
+                    entity.setDeltaMovement(reboundedVelocity);
 
-                    if (bouncesLeft - 1 <= 0) {
+                    // Handle splitting logic on FIRST bounce
+                    if (data.canSplit) {
+                        spawnSplitProjectiles(event.level, entity, reboundedVelocity, data.bouncesLeft - 1);
+                        data.canSplit = false; // Split only triggers once
+                    }
+
+                    data.bouncesLeft--;
+                    if (data.bouncesLeft <= 0) {
                         iterator.remove();
                     }
                 }
             }
         }
+    }
+
+    private static void spawnSplitProjectiles(Level level, Entity original, Vec3 baseVelocity, int remainingBounces) {
+        // Angled velocities (+30 and -30 degrees yaw rotation)
+        Vec3 leftVel = baseVelocity.yRot((float) Math.toRadians(30));
+        Vec3 rightVel = baseVelocity.yRot((float) Math.toRadians(-30));
+
+         if (original instanceof LargeFireball oldFB) {
+            spawnChildFireball(level, oldFB, leftVel, remainingBounces);
+            spawnChildFireball(level, oldFB, rightVel, remainingBounces);
+        }
+    }
+
+
+
+    private static void spawnChildFireball(Level level, LargeFireball parent, Vec3 velocity, int remainingBounces) {
+        LargeFireball child = new LargeFireball(level, (Player) parent.getOwner(), velocity.x, velocity.y, velocity.z, 1);
+        child.setPos(parent.getX(), parent.getY(), parent.getZ());
+        child.setDeltaMovement(velocity);
+
+        if (remainingBounces > 0) {
+            trackedEntities.put(child, new TrackerData(remainingBounces, false));
+        }
+        level.addFreshEntity(child);
     }
 }

@@ -16,6 +16,9 @@ public class ModPotions {
     public static final RegistryObject<Potion> MANA_BREW = POTIONS.register("mana_brew",
             () -> new Potion(new MobEffectInstance(ModEffects.MANA_REGEN.get(), 1200, 0)));
 
+    public static final RegistryObject<Potion> CREEPER_MILK = POTIONS.register("creeper_milk",
+            () -> new Potion(new MobEffectInstance(ModEffects.TIME_BOMB.get(), 200, 0)));
+
     public static void register(IEventBus eventBus) {
         POTIONS.register(eventBus);
     }

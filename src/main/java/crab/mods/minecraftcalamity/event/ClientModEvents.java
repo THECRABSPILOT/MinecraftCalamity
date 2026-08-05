@@ -2,7 +2,9 @@ package crab.mods.minecraftcalamity.event;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.client.gui.HellforgeScreen;
-import crab.mods.minecraftcalamity.client.model.CalamititeArmorModel;
+import crab.mods.minecraftcalamity.client.model.CalamititeChampionArmorModel;
+import crab.mods.minecraftcalamity.client.renderer.DiviniumBlockEntityRenderer;
+import crab.mods.minecraftcalamity.client.renderer.EtheriumBlockRenderer;
 import crab.mods.minecraftcalamity.client.renderer.PedestalBlockEntityRenderer;
 import crab.mods.minecraftcalamity.client.screen.ArcaneWorkbenchScreen;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
@@ -48,7 +50,7 @@ public class ClientModEvents {
     // 2. Register the layer definition with Forge during client setup
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(CALAMITITE_ARMOR_LAYER, CalamititeArmorModel::createBodyLayer);
+        event.registerLayerDefinition(CALAMITITE_ARMOR_LAYER, CalamititeChampionArmorModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -81,6 +83,8 @@ public class ClientModEvents {
         event.registerEntityRenderer(ModEntityTypes.CAVE_WIZARD.get(), CaveWizardRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.DYNAMIC_PROJECTILE.get(), DynamicProjectileRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.SWORD_PROJECTILE.get(), SwordProjectileRenderer::new);
+        event.registerBlockEntityRenderer(crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.ETHERIUM_BE.get(), EtheriumBlockRenderer::new);
+        event.registerBlockEntityRenderer(crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.DIVINIUM_BE.get(), DiviniumBlockEntityRenderer::new);
     }
 
     // 3. Forge Bus Listener for Player Layer Hiding & Input Events

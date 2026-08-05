@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "minecraftcalamity:wooden_staff"
+    "minecraftcalamity:wooden_staff",
+    "minecraftcalamity:rose_staff"
   ]
 }

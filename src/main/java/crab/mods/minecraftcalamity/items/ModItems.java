@@ -78,7 +78,8 @@ public class ModItems {
             () -> new CalamitieArmorItem(ModArmorMaterials.CALAMITITE_ARMOR, ArmorItem.Type.BOOTS, new Item.Properties()));
 
 
-
+    public static final RegistryObject<Item> ROSE_STAFF = ITEMS.register("rose_staff",
+            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),4,10,0.2));
 
     //SpellBooks
 
@@ -132,10 +133,12 @@ public class ModItems {
     public static final RegistryObject<Item> BOTCHED_ENCHANTED_SWORD = ITEMS.register("botched_enchanted_sword",
             () -> new EnchantedSwordItem(Tiers.DIAMOND, 10, -2.4f, new Item.Properties(),"§7Feels off."));
 
-//blocks
+    //blocks
     public static final RegistryObject<Item> SWORD_IN_STONE = ITEMS.register("sword_in_stone",
             () -> new BlockItem(ModBlocks.SWORD_IN_STONE.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> IRON_DRILL = ITEMS.register("iron_drill",
+            () -> new DrillItem(Tiers.IRON, 1, -2.8F, 3, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
