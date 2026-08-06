@@ -7,6 +7,9 @@ import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
 import crab.mods.minecraftcalamity.items.magicitems.StaffSpellItem;
 import crab.mods.minecraftcalamity.items.magicitems.UniqueBooks.MonsterBookItem;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -142,6 +145,19 @@ public class ModItems {
 
     public static final RegistryObject<Item> LARGE_BOTTLE = ITEMS.register("large_bottle",
             () -> new LargeBottleItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> SCOOPER = ITEMS.register("scooper",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> SHULKER_MEAT = ITEMS.register("shulker_meat",
+            () -> new Item(new Item.Properties()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(0)
+                            .saturationMod(0f)
+                            .effect(() -> new MobEffectInstance(MobEffects.LEVITATION, 600, 1), 1.0f) // Effect, Duration (ticks), Amplifier (0=I), Chance (1.0f=100%)
+                            .alwaysEat()
+                            .build()
+            )));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

@@ -46,10 +46,6 @@ public class LargeBottleItem extends Item {
         ItemStack bottle = player.getItemInHand(hand);
         ItemStack offhand = player.getOffhandItem();
 
-        // DEBUG: Spams chat when you click the item so you know interactions work
-        if (level.isClientSide) {
-            player.sendSystemMessage(Component.literal("🚨 ITEM USE CALLED! Fluid: " + getFluidAmount(bottle)));
-        }
 
         // ==============================
         // Fill bottle with potion

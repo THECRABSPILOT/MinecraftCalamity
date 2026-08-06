@@ -26,10 +26,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -41,7 +38,6 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 
 import static crab.mods.minecraftcalamity.blocks.ModBlocks.SWORD_IN_STONE;
@@ -76,7 +72,10 @@ public class ClientModEvents {
         });
     }
 
-
+    @SubscribeEvent
+    public static void onModelRegister(ModelEvent.RegisterAdditional event) {
+        event.register(new ResourceLocation("minecraftcalamity", "item/large_bottle_stati"));
+    }
 
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
