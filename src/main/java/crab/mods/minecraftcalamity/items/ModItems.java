@@ -2,6 +2,7 @@ package crab.mods.minecraftcalamity.items;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
+import crab.mods.minecraftcalamity.items.accessory.SatchelItem;
 import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
@@ -126,6 +127,8 @@ public class ModItems {
     public static final RegistryObject<Item> CLOUD_IN_A_JAR = ITEMS.register("cloud_in_a_jar",
             () -> new CloudInAJar(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> SATCHEL = ITEMS.register("satchel",
+            () -> new SatchelItem(new Item.Properties().stacksTo(1)));
 
 
     //WEAPONS
@@ -178,6 +181,8 @@ public class ModItems {
     public static final RegistryObject<Item> SCULK_GRIMOIRE = ITEMS.register("sculk_grimoire",
             () -> new SpellBookItem(new Item.Properties().stacksTo(1), 8));
 
+    public static final RegistryObject<Item> SCULK_AXE = ITEMS.register("sculk_axe",
+            () -> new AxeItem(Tiers.IRON, 3, -2.4f, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

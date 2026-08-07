@@ -48,18 +48,24 @@ public class ModMessages {
                 .add();
 
         // 4. Spell Cast & Mana Sync Packet (Bidirectional)
-        // Notice: Removed NetworkDirection parameter so it can go C2S and S2C safely
         net.messageBuilder(SpellCastPacket.class, id())
                 .decoder(SpellCastPacket::new)
                 .encoder(SpellCastPacket::encode)
                 .consumerMainThread(SpellCastPacket::handle)
                 .add();
 
-
-        INSTANCE.messageBuilder(ChangeSpellSlotPacket.class, id())
+        // 5. Change Spell Slot Packet
+        net.messageBuilder(ChangeSpellSlotPacket.class, id())
                 .encoder(ChangeSpellSlotPacket::encode)
                 .decoder(ChangeSpellSlotPacket::new)
                 .consumerMainThread(ChangeSpellSlotPacket::handle)
+                .add();
+
+        // 6. Satchel Accessories Swap Packet (Client -> Server)
+        net.messageBuilder(AccessoriesC2SPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(AccessoriesC2SPacket::new)
+                .encoder(AccessoriesC2SPacket::toBytes)
+                .consumerMainThread(AccessoriesC2SPacket::handle)
                 .add();
     }
 
@@ -68,7 +74,7 @@ public class ModMessages {
         INSTANCE.sendToServer(message);
     }
 
-    // Send packet to specific Player (Fixes your compiler error!)
+    // Send packet to specific Player
     public static <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
     }

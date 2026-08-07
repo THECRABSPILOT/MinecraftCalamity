@@ -25,9 +25,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -104,12 +108,20 @@ public class MinecraftCalamity {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            // Entity Spawn Placement
             SpawnPlacements.register(
                     ModEntityTypes.CAVE_WIZARD.get(),
                     SpawnPlacements.Type.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     CaveWizardEntity::checkCaveWizardSpawnRules
             );
+
+            // Standard Forge Brewing Recipe
+            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.LEAPING)),
+                    Ingredient.of(ModItems.SHULKER_MEAT.get()),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.LEVITATION_POTION.get())
+            ));
         });
     }
 
@@ -201,4 +213,6 @@ public class MinecraftCalamity {
             event.accept(lingeringPotion);
         }
     }
+
+
 }

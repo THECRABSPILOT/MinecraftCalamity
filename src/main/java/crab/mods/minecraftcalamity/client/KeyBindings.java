@@ -2,8 +2,12 @@ package crab.mods.minecraftcalamity.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
+import crab.mods.minecraftcalamity.network.AccessoriesC2SPacket;
 import crab.mods.minecraftcalamity.network.ModMessages;
 import crab.mods.minecraftcalamity.network.OpenAccessoryMenuC2SPacket;
+// Import your new packet here
+// import crab.mods.minecraftcalamity.network.YourNewActionC2SPacket;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -17,12 +21,24 @@ import org.lwjgl.glfw.GLFW;
 public class KeyBindings {
 
     public static final String KEY_CATEGORY = "key.categories." + MinecraftCalamity.MODID;
-    public static final String KEY_OPEN_ACCESSORIES = "key." + MinecraftCalamity.MODID + ".open_accessories";
 
+    // Keybind description strings
+    public static final String KEY_OPEN_ACCESSORIES = "key." + MinecraftCalamity.MODID + ".open_accessories";
+    public static final String KEY_CHECK_SATCHEL = "key." + MinecraftCalamity.MODID + ".open_satchel";
+
+    // Original keybind
     public static final KeyMapping ACCESSORY_KEY = new KeyMapping(
             KEY_OPEN_ACCESSORIES,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_P,
+            KEY_CATEGORY
+    );
+
+
+    public static final KeyMapping CHECK_SATCHEL_KEY = new KeyMapping(
+            KEY_CHECK_SATCHEL,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_K,
             KEY_CATEGORY
     );
 
@@ -31,6 +47,7 @@ public class KeyBindings {
         @SubscribeEvent
         public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
             event.register(ACCESSORY_KEY);
+            event.register(CHECK_SATCHEL_KEY);
         }
     }
 
@@ -39,14 +56,18 @@ public class KeyBindings {
         @SubscribeEvent
         public static void onKeyInput(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
+
+                // Original Keybind Handling
                 while (ACCESSORY_KEY.consumeClick()) {
                     if (Minecraft.getInstance().player != null) {
-
-                        // 1. Send chat message to player (Client-side)
-
-
-                        // 2. Send packet to server to open the screen
                         ModMessages.sendToServer(new OpenAccessoryMenuC2SPacket());
+                    }
+                }
+
+
+                while (CHECK_SATCHEL_KEY.consumeClick()) {
+                    if (Minecraft.getInstance().player != null) {
+                        ModMessages.sendToServer(new AccessoriesC2SPacket());
                     }
                 }
             }
