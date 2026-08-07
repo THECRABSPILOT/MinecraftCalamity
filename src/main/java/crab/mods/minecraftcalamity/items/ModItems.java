@@ -48,7 +48,7 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.ARCANE_WORKBENCH.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> WOODEN_STAFF = ITEMS.register("wooden_staff",
-            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),2,10,0.2));
+            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),2,10,0.2,1.0));
 //STAFF SPELLS
 
     public static final RegistryObject<Item> FIREBALL_CORE = ITEMS.register("fireball_core",
@@ -82,7 +82,7 @@ public class ModItems {
 
 
     public static final RegistryObject<Item> ROSE_STAFF = ITEMS.register("rose_staff",
-            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),4,10,0.2));
+            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),4,10,0.2,1.2));
 
     //SpellBooks
 
@@ -158,6 +158,26 @@ public class ModItems {
                             .alwaysEat()
                             .build()
             )));
+
+
+
+    //SCULK ITEMS
+
+    public static final RegistryObject<Item> SCULK_CARTILAGE = ITEMS.register("sculk_cartilage",
+            () -> new Item(new Item.Properties().stacksTo(64)));
+
+    public static final RegistryObject<Item> SCULK_TENDRIL = ITEMS.register("sculk_tendril",
+            () -> new Item(new Item.Properties().stacksTo(64)));
+
+    public static final RegistryObject<Item> SWORD_OF_THE_DEEP = ITEMS.register("sword_of_the_deep",
+            () -> new SwordItem(Tiers.IRON, 3, -2.4f, new Item.Properties()));
+
+    public static final RegistryObject<Item> SCULK_SCEPTER = ITEMS.register("sculk_scepter",
+            () -> new ModularStaffItem(new Item.Properties().stacksTo(1),6,15,0.2,1.5));
+
+    public static final RegistryObject<Item> SCULK_GRIMOIRE = ITEMS.register("sculk_grimoire",
+            () -> new SpellBookItem(new Item.Properties().stacksTo(1), 8));
+
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

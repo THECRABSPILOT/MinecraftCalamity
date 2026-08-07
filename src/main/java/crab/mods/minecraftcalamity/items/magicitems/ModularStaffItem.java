@@ -21,12 +21,14 @@ public class ModularStaffItem extends Item {
     private final int SpellSlots;
     private final int BaseManaCost;
     private final double CastSpeed;
+    private final double magicboost;
 
-    public ModularStaffItem(Properties properties, int SpellSlots, int BaseManaCost, double CastSpeed) {
+    public ModularStaffItem(Properties properties, int SpellSlots, int BaseManaCost, double CastSpeed, double magicboost) {
         super(properties);
         this.SpellSlots = SpellSlots;
         this.BaseManaCost = BaseManaCost;
         this.CastSpeed = CastSpeed;
+        this.magicboost = magicboost;
     }
 
     @Override
@@ -50,7 +52,6 @@ public class ModularStaffItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
 
-        // Ensure NBT exists on use if spawned via commands/creative
         if (!itemstack.getOrCreateTag().contains("SpellSlots")) {
             itemstack.getTag().putInt("SpellSlots", this.SpellSlots);
         }
@@ -189,8 +190,12 @@ public class ModularStaffItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         int maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : this.SpellSlots;
+
+        // Display stats cleanly in your custom text section
         tooltipComponents.add(Component.literal("§bSpell Slots: " + maxSlots));
         tooltipComponents.add(Component.literal("§3Base Mana Cost: §f" + this.BaseManaCost));
+        tooltipComponents.add(Component.literal("§fx" + this.magicboost + " Spell Power"));
+        tooltipComponents.add(Component.literal("§9Cast Delay: §f" + this.CastSpeed + "s"));
 
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             tooltipComponents.add(Component.literal("§7--- Spell Slots ---"));

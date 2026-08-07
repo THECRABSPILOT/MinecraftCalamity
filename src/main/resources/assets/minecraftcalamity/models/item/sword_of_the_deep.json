@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "minecraftcalamity:item/woodenstaff"
+    "layer0": "minecraftcalamity:item/skulkblade"
   }
 }

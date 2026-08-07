@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    " B ",
+    "XSX"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraftcalamity:sculk_cartilage"
+    },
+    "X": {
+      "item": "minecraftcalamity:sculk_tendril"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:sword_of_the_deep",
+    "count": 1
+  }
+}

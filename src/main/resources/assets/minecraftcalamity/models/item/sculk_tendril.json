@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "minecraftcalamity:item/animated/tendril/sculk_sensor_tendril_inactive"
+  }
+}

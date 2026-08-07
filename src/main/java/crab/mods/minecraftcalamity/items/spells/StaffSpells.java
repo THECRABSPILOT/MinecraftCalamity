@@ -20,14 +20,16 @@ public class StaffSpells {
     private static boolean bounceModifierActive = false;
     private static boolean splitModifierActive = false;
 
-    // Helper class to store individual entity bounce state and split capability
+    // Helper class to store individual entity bounce state, split capability, and magic boost power
     private static class TrackerData {
         int bouncesLeft;
         boolean canSplit;
+        double magicBoost;
 
-        TrackerData(int bouncesLeft, boolean canSplit) {
+        TrackerData(int bouncesLeft, boolean canSplit, double magicBoost) {
             this.bouncesLeft = bouncesLeft;
             this.canSplit = canSplit;
+            this.magicBoost = magicBoost;
         }
     }
 
@@ -36,7 +38,6 @@ public class StaffSpells {
 
     private final Object[][] projectiles = {
             {"fireball_core", 5},
-
     };
 
     private final Object[][] modifiers = {
@@ -75,19 +76,34 @@ public class StaffSpells {
             double spawnY = player.getY() + player.getEyeHeight() + lookVec.y * 1.5;
             double spawnZ = player.getZ() + lookVec.z * 1.5;
 
-            LargeFireball fireball = new LargeFireball(level, player, lookVec.x, lookVec.y, lookVec.z, 1);
+            // Extract magic boost attribute value from player's mainhand item if it's a ModularStaffItem
+            double magicBoostVal = 0.0;
+            if (player.getMainHandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem staff) {
+                // Accessing magicboost via reflection or package-private/getter if available.
+                // Alternatively, read it directly from attributes or calculate based on item data.
+                try {
+                    java.lang.reflect.Field boostField = staff.getClass().getDeclaredField("magicboost");
+                    boostField.setAccessible(true);
+                    magicBoostVal = boostField.getDouble(staff);
+                } catch (Exception e) {
+                    magicBoostVal = 0.0;
+                }
+            }
+
+            // Scale explosion power or speed dynamically with magic boost (Base explosion power is 1 + boost)
+            int explosionPower = (int) Math.max(1, 1 + Math.round(magicBoostVal));
+
+            LargeFireball fireball = new LargeFireball(level, player, lookVec.x, lookVec.y, lookVec.z, explosionPower);
             fireball.setPos(spawnX, spawnY, spawnZ);
 
             if (bounceModifierActive) {
-                trackedEntities.put(fireball, new TrackerData(3, splitModifierActive));
+                trackedEntities.put(fireball, new TrackerData(3, splitModifierActive, magicBoostVal));
             }
 
             level.addFreshEntity(fireball);
             resetModifiers();
         }
     }
-
-
 
     private static void resetModifiers() {
         bounceModifierActive = false;
@@ -124,7 +140,6 @@ public class StaffSpells {
                 double newZ = motion.z;
                 boolean bounced = false;
 
-                // Detect axis collisions
                 if (event.level.getBlockState(BlockPos.containing(position.x + motion.x, position.y, position.z)).isSolid()) {
                     newX = -motion.x * 0.8;
                     bounced = true;
@@ -142,10 +157,9 @@ public class StaffSpells {
                     Vec3 reboundedVelocity = new Vec3(newX, newY, newZ);
                     entity.setDeltaMovement(reboundedVelocity);
 
-                    // Handle splitting logic on FIRST bounce
                     if (data.canSplit) {
-                        spawnSplitProjectiles(event.level, entity, reboundedVelocity, data.bouncesLeft - 1);
-                        data.canSplit = false; // Split only triggers once
+                        spawnSplitProjectiles(event.level, entity, reboundedVelocity, data.bouncesLeft - 1, data.magicBoost);
+                        data.canSplit = false;
                     }
 
                     data.bouncesLeft--;
@@ -157,26 +171,24 @@ public class StaffSpells {
         }
     }
 
-    private static void spawnSplitProjectiles(Level level, Entity original, Vec3 baseVelocity, int remainingBounces) {
-        // Angled velocities (+30 and -30 degrees yaw rotation)
+    private static void spawnSplitProjectiles(Level level, Entity original, Vec3 baseVelocity, int remainingBounces, double magicBoost) {
         Vec3 leftVel = baseVelocity.yRot((float) Math.toRadians(30));
         Vec3 rightVel = baseVelocity.yRot((float) Math.toRadians(-30));
 
-         if (original instanceof LargeFireball oldFB) {
-            spawnChildFireball(level, oldFB, leftVel, remainingBounces);
-            spawnChildFireball(level, oldFB, rightVel, remainingBounces);
+        if (original instanceof LargeFireball oldFB) {
+            spawnChildFireball(level, oldFB, leftVel, remainingBounces, magicBoost);
+            spawnChildFireball(level, oldFB, rightVel, remainingBounces, magicBoost);
         }
     }
 
-
-
-    private static void spawnChildFireball(Level level, LargeFireball parent, Vec3 velocity, int remainingBounces) {
-        LargeFireball child = new LargeFireball(level, (Player) parent.getOwner(), velocity.x, velocity.y, velocity.z, 1);
+    private static void spawnChildFireball(Level level, LargeFireball parent, Vec3 velocity, int remainingBounces, double magicBoost) {
+        int explosionPower = (int) Math.max(1, 1 + Math.round(magicBoost));
+        LargeFireball child = new LargeFireball(level, (Player) parent.getOwner(), velocity.x, velocity.y, velocity.z, explosionPower);
         child.setPos(parent.getX(), parent.getY(), parent.getZ());
         child.setDeltaMovement(velocity);
 
         if (remainingBounces > 0) {
-            trackedEntities.put(child, new TrackerData(remainingBounces, false));
+            trackedEntities.put(child, new TrackerData(remainingBounces, false, magicBoost));
         }
         level.addFreshEntity(child);
     }
