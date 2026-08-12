@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraftcalamity:arcane_workbench"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        },
+        {
+          "condition": "minecraft:has_stating_tool_or_similar",
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "has_the_correct_tool": true
+          }
+        }
+      ]
+    }
+  ]
+}

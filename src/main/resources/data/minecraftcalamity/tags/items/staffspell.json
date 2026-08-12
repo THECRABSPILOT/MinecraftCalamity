@@ -4,6 +4,7 @@
     "minecraftcalamity:fireball_core",
     "minecraftcalamity:bounce_modifier",
     "minecraftcalamity:split_modifier",
-    "minecraftcalamity:lightning_core"
+    "minecraftcalamity:lightning_core",
+    "minecraftcalamity:soul_bolt"
   ]
 }

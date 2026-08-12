@@ -62,6 +62,8 @@ public class ModItems {
     public static final RegistryObject<Item> LIGHTNING_CORE = ITEMS.register("lightning_core",
             () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "projectile"));
 
+    public static final RegistryObject<Item> SOUL_BOLT = ITEMS.register("soul_bolt",
+            () -> new StaffSpellItem(new Item.Properties().stacksTo(64), "projectile"));
 
 
     public static final RegistryObject<Item> SPLIT_MODIFER = ITEMS.register("split_modifier",

@@ -52,7 +52,6 @@ public class PlayerMana {
     }
 
     public void regenMana(Player player, int amount) {
-        // Replace ModEffects.MANA_REGEN with your actual registered MobEffect instance
         if (player != null && player.hasEffect(ModEffects.MANA_REGEN.get())) {
             this.currentMana = Math.min(getMaxMana(player), this.currentMana + 10);
         } else {

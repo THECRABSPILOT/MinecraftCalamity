@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "minecraftcalamity:librarian_book",
-    "minecraftcalamity:carniverous_grimoire"
+    "minecraftcalamity:carniverous_grimoire",
+    "minecraftcalamity:sculk_grimoire"
   ]
 }

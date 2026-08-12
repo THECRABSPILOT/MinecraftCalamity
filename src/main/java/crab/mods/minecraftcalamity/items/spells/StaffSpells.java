@@ -1,10 +1,13 @@
 package crab.mods.minecraftcalamity.items.spells;
 
+import crab.mods.minecraftcalamity.entity.custom.SwordProjectileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,7 +23,7 @@ public class StaffSpells {
     private static boolean bounceModifierActive = false;
     private static boolean splitModifierActive = false;
 
-    // Helper class to store individual entity bounce state, split capability, and magic boost power
+
     private static class TrackerData {
         int bouncesLeft;
         boolean canSplit;
@@ -33,11 +36,12 @@ public class StaffSpells {
         }
     }
 
-    // Track bouncing/splitting entities
+
     private static final ConcurrentHashMap<Entity, TrackerData> trackedEntities = new ConcurrentHashMap<>();
 
     private final Object[][] projectiles = {
             {"fireball_core", 5},
+            {"soul_bolt", 5},
     };
 
     private final Object[][] modifiers = {
@@ -76,12 +80,10 @@ public class StaffSpells {
             double spawnY = player.getY() + player.getEyeHeight() + lookVec.y * 1.5;
             double spawnZ = player.getZ() + lookVec.z * 1.5;
 
-            // Extract magic boost attribute value from player's mainhand item if it's a ModularStaffItem
+
             double magicBoostVal = 0.0;
             if (player.getMainHandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem staff) {
-                // Accessing magicboost via reflection or package-private/getter if available.
-                // Alternatively, read it directly from attributes or calculate based on item data.
-                try {
+               try {
                     java.lang.reflect.Field boostField = staff.getClass().getDeclaredField("magicboost");
                     boostField.setAccessible(true);
                     magicBoostVal = boostField.getDouble(staff);
@@ -90,7 +92,6 @@ public class StaffSpells {
                 }
             }
 
-            // Scale explosion power or speed dynamically with magic boost (Base explosion power is 1 + boost)
             int explosionPower = (int) Math.max(1, 1 + Math.round(magicBoostVal));
 
             LargeFireball fireball = new LargeFireball(level, player, lookVec.x, lookVec.y, lookVec.z, explosionPower);
@@ -101,6 +102,58 @@ public class StaffSpells {
             }
 
             level.addFreshEntity(fireball);
+            resetModifiers();
+        }
+    }
+
+    public void soul_bolt(Player player, Level level) {
+        if (!level.isClientSide()) {
+            Vec3 lookVec = player.getLookAngle();
+            double spawnX = player.getX() + lookVec.x * 1.5;
+            double spawnY = player.getY() + player.getEyeHeight() + lookVec.y * 1.5;
+            double spawnZ = player.getZ() + lookVec.z * 1.5;
+
+            double magicBoostVal = 0.0;
+            if (player.getMainHandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem staff) {
+                try {
+                    java.lang.reflect.Field boostField = staff.getClass().getDeclaredField("magicboost");
+                    boostField.setAccessible(true);
+                    magicBoostVal = boostField.getDouble(staff);
+                } catch (Exception e) {
+                    magicBoostVal = 0.0;
+                }
+            }
+
+            EntityType<SwordProjectileEntity> projectileType = (EntityType<SwordProjectileEntity>) (EntityType<?>) net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(new net.minecraft.resources.ResourceLocation("minecraftcalamity", "dynamic_projectile"));
+
+            SwordProjectileEntity projectile = new SwordProjectileEntity(projectileType, level);
+            projectile.setPos(spawnX, spawnY, spawnZ);
+
+
+            projectile.setYRot(player.getYRot());
+            projectile.setXRot(player.getXRot());
+            projectile.yRotO = player.getYRot();
+            projectile.xRotO = player.getXRot();
+
+
+            projectile.setProjectileColor(0x00ffe1);
+
+
+            projectile.setParticleConfig("minecraft:soul", 0.1D, false, false);
+
+            double baseDamage = 5.0D;
+            double finalDamage = baseDamage * (1.0D + magicBoostVal);
+            projectile.setStats(finalDamage, 0.0D, 0.0D, false, 10.0F, null, 0, 0);
+
+
+            Vec3 motion = lookVec.scale(2.0);
+            projectile.setDeltaMovement(motion);
+
+            if (bounceModifierActive) {
+                trackedEntities.put(projectile, new TrackerData(3, splitModifierActive, magicBoostVal));
+            }
+
+            level.addFreshEntity(projectile);
             resetModifiers();
         }
     }
@@ -134,21 +187,23 @@ public class StaffSpells {
             Vec3 position = entity.position();
             Vec3 motion = entity.getDeltaMovement();
 
-            if (!event.level.noCollision(entity, entity.getBoundingBox().inflate(0.1))) {
+            AABB inflatedBox = entity.getBoundingBox().expandTowards(motion).inflate(0.8D);
+
+            if (!event.level.noCollision(entity, inflatedBox)) {
                 double newX = motion.x;
                 double newY = motion.y;
                 double newZ = motion.z;
                 boolean bounced = false;
 
-                if (event.level.getBlockState(BlockPos.containing(position.x + motion.x, position.y, position.z)).isSolid()) {
+                 if (event.level.getBlockState(BlockPos.containing(position.x + motion.x * 1.2, position.y, position.z)).isSolid()) {
                     newX = -motion.x * 0.8;
                     bounced = true;
                 }
-                if (event.level.getBlockState(BlockPos.containing(position.x, position.y + motion.y, position.z)).isSolid()) {
+                if (event.level.getBlockState(BlockPos.containing(position.x, position.y + motion.y * 1.2, position.z)).isSolid()) {
                     newY = -motion.y * 0.8;
                     bounced = true;
                 }
-                if (event.level.getBlockState(BlockPos.containing(position.x, position.y, position.z + motion.z)).isSolid()) {
+                if (event.level.getBlockState(BlockPos.containing(position.x, position.y, position.z + motion.z * 1.2)).isSolid()) {
                     newZ = -motion.z * 0.8;
                     bounced = true;
                 }
@@ -178,6 +233,9 @@ public class StaffSpells {
         if (original instanceof LargeFireball oldFB) {
             spawnChildFireball(level, oldFB, leftVel, remainingBounces, magicBoost);
             spawnChildFireball(level, oldFB, rightVel, remainingBounces, magicBoost);
+        } else if (original instanceof SwordProjectileEntity oldSoul) {
+            spawnChildSoulBolt(level, oldSoul, leftVel, remainingBounces, magicBoost);
+            spawnChildSoulBolt(level, oldSoul, rightVel, remainingBounces, magicBoost);
         }
     }
 
@@ -192,4 +250,31 @@ public class StaffSpells {
         }
         level.addFreshEntity(child);
     }
+
+    private static void spawnChildSoulBolt(Level level, SwordProjectileEntity parent, Vec3 velocity, int remainingBounces, double magicBoost) {
+        EntityType<SwordProjectileEntity> projectileType = (EntityType<SwordProjectileEntity>) (EntityType<?>) net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(new net.minecraft.resources.ResourceLocation("minecraftcalamity", "dynamic_projectile"));
+
+        SwordProjectileEntity child = new SwordProjectileEntity(projectileType, level);
+        child.setPos(parent.getX(), parent.getY(), parent.getZ());
+
+        child.setYRot(parent.getYRot());
+        child.setXRot(parent.getXRot());
+        child.yRotO = parent.getYRot();
+        child.xRotO = parent.getXRot();
+
+        child.setProjectileColor(0x00ffe1);
+        child.setParticleConfig("minecraft:soul", 0.1D, false, false);
+
+        double baseDamage = 5.0D;
+        double finalDamage = baseDamage * (1.0D + magicBoost);
+        child.setStats(finalDamage, 0.0D, 0.0D, false, 10.0F, null, 0, 0);
+
+        child.setDeltaMovement(velocity);
+
+        if (remainingBounces > 0) {
+            trackedEntities.put(child, new TrackerData(remainingBounces, false, magicBoost));
+        }
+        level.addFreshEntity(child);
+    }
+
 }

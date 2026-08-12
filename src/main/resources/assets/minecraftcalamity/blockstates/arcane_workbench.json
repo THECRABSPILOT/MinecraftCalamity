@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "minecraftcalamity:block/arcane_workbench"
+    },
+    "facing=east": {
+      "model": "minecraftcalamity:block/arcane_workbench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "minecraftcalamity:block/arcane_workbench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "minecraftcalamity:block/arcane_workbench",
+      "y": 270
+    }
+  }
+}

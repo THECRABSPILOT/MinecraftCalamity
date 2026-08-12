@@ -36,7 +36,9 @@ public class ModBlocks {
             () -> new ArcaneWorkbenchBlock(BlockBehaviour.Properties.of()
                     .strength(3.5F, 6.0F)
                     .requiresCorrectToolForDrops()
+                    .noOcclusion()
                     .sound(SoundType.STONE)));
+
 
     public static final RegistryObject<Block> PEDESTAL_BLOCK = BLOCKS.register("pedestal",
             () -> new crab.mods.minecraftcalamity.block.PedestalBlock(Block.Properties.of()

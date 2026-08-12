@@ -36,7 +36,7 @@ public class HellforgeMenu extends AbstractContainerMenu {
         if (this.blockEntity != null) {
             this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
                 // Slot 0: Top Left Input (Moved left 4, up 1) -> (40, 17)
-                this.addSlot(new SlotItemHandler(handler, 0, 40, 17));
+                this.addSlot(new SlotItemHandler(handler, 0, 34, 17));
 
                 // Slot 1: Top Right Input (Moved left 6, up 1) -> (56, 17)
                 this.addSlot(new SlotItemHandler(handler, 1, 56, 17));

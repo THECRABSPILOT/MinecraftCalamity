@@ -73,6 +73,16 @@ public class MinecraftCalamity {
                     })
                     .build());
 
+    public static final RegistryObject<CreativeModeTab> CALAMITY_MAGIC = CREATIVE_MODE_TABS.register("calamity_magic",
+            () -> CreativeModeTab.builder()
+                    .icon(() -> new ItemStack(ModItems.SCULK_SCEPTER.get())) // Icon displayed on tab header
+                    .title(Component.translatable("creativetab.minecraftcalamity.tab"))
+                    .displayItems((parameters, output) -> {
+                        // Populates tab with all items registered in ModItems
+                        ModItems.ITEMS.getEntries().forEach(item -> output.accept(item.get()));
+                    })
+                    .build());
+
     public MinecraftCalamity(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         //so many registers broo i need to merge a few at some point
@@ -96,7 +106,7 @@ public class MinecraftCalamity {
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CalamityConfig.SPEC);
 
-        // 6. Register Forge Event Bus
+
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -108,7 +118,7 @@ public class MinecraftCalamity {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            // Entity Spawn Placement
+
             SpawnPlacements.register(
                     ModEntityTypes.CAVE_WIZARD.get(),
                     SpawnPlacements.Type.ON_GROUND,
@@ -116,16 +126,22 @@ public class MinecraftCalamity {
                     CaveWizardEntity::checkCaveWizardSpawnRules
             );
 
-            // Standard Forge Brewing Recipe
+
             BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
                     Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.LEAPING)),
                     Ingredient.of(ModItems.SHULKER_MEAT.get()),
                     PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.LEVITATION_POTION.get())
             ));
+
+            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION)),
+                    Ingredient.of(ModItems.MANA_STAR.get()),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.MANA_BREW.get())
+            ));
         });
     }
 
-    // Server-side call to open the accessory GUI
+
     public static void openAccessoryMenu(ServerPlayer player) {
         NetworkHooks.openScreen(
                 player,
