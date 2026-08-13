@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "BBB",
+    "B B"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraftcalamity:amethyst_dust"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:mana_star",
+    "count": 1
+  }
+}

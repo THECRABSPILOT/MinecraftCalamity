@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    " B ",
+    "   "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:amethyst_shard"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:amethyst_dust",
+    "count": 1
+  }
+}

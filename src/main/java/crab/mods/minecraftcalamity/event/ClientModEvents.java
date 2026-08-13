@@ -20,6 +20,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -34,6 +35,7 @@ import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
 import crab.mods.minecraftcalamity.client.renderer.LargeBottleRenderer;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

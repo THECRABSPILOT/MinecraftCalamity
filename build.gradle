@@ -2,6 +2,8 @@ buildscript {
     repositories {
         // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven { url = 'https://minecraftforge.net' }
+
         mavenCentral()
     }
     dependencies {
@@ -81,6 +83,13 @@ minecraft {
             // "SCAN": For mods scan.
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug', 'true'
+            property 'mixin.debug.export', 'true'
+            property 'mixin.debug.verbose', 'true'
+            property 'mixin.env.obfuscationMap', "${project.projectDir}/build/createSrgToMcp/output.srg"
+            property 'force.mixin.obfuscation.map', 'true'
             property 'forge.logging.markers', 'REGISTRIES'
 
 
@@ -142,6 +151,20 @@ repositories {
     //     dir 'libs'
     // }
 
+        maven {
+            url = "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+
 
 }
 
@@ -152,7 +175,17 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-   
+
+
+
+    runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.31+mc1.20.1")
+
+
+    runtimeOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.7.0")
+
+    runtimeOnly fg.deobf("maven.modrinth:entitytexturefeatures:6.2.5")
+    runtimeOnly fg.deobf("maven.modrinth:entity-model-features:2.4.0")
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

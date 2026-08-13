@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " MT",
+    " S ",
+    "TS "
+  ],
+  "key": {
+    "S": {
+      "item": "minecraftcalamity:sculk_cartilage"
+    },
+    "T": {
+      "item": "minecraftcalamity:sculk_tendril"
+    },
+    "M": {
+      "item": "minecraftcalamity:mana_star"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:sculk_scepter",
+    "count": 1
+  }
+}

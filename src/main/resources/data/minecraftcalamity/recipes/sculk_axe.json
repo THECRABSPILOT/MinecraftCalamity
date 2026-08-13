@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SST",
+    "SM ",
+    "TM "
+  ],
+  "key": {
+    "S": {
+      "item": "minecraftcalamity:sculk_cartilage"
+    },
+    "T": {
+      "item": "minecraftcalamity:sculk_tendril"
+    },
+    "M": {
+      "item": "minecraftcalamity:stick"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:sculk_axe",
+    "count": 1
+  }
+}

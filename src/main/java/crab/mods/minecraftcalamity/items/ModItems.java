@@ -50,6 +50,10 @@ public class ModItems {
 
     public static final RegistryObject<Item> WOODEN_STAFF = ITEMS.register("wooden_staff",
             () -> new ModularStaffItem(new Item.Properties().stacksTo(1),2,10,0.2,1.0));
+
+    public static final RegistryObject<Item> AMETHYST_DUST = ITEMS.register("amethyst_dust",
+            () -> new Item(new Item.Properties()));
+
 //STAFF SPELLS
 
     public static final RegistryObject<Item> FIREBALL_CORE = ITEMS.register("fireball_core",

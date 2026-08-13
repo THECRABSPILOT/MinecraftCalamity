@@ -73,15 +73,6 @@ public class MinecraftCalamity {
                     })
                     .build());
 
-    public static final RegistryObject<CreativeModeTab> CALAMITY_MAGIC = CREATIVE_MODE_TABS.register("calamity_magic",
-            () -> CreativeModeTab.builder()
-                    .icon(() -> new ItemStack(ModItems.SCULK_SCEPTER.get())) // Icon displayed on tab header
-                    .title(Component.translatable("creativetab.minecraftcalamity.tab"))
-                    .displayItems((parameters, output) -> {
-                        // Populates tab with all items registered in ModItems
-                        ModItems.ITEMS.getEntries().forEach(item -> output.accept(item.get()));
-                    })
-                    .build());
 
     public MinecraftCalamity(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
