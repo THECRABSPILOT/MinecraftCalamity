@@ -2,12 +2,17 @@ package crab.mods.minecraftcalamity.items.spells;
 
 import crab.mods.minecraftcalamity.entity.custom.SwordProjectileEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,6 +47,7 @@ public class StaffSpells {
     private final Object[][] projectiles = {
             {"fireball_core", 5},
             {"soul_bolt", 5},
+            {"lightning_core", 5}
     };
 
     private final Object[][] modifiers = {
@@ -155,6 +161,22 @@ public class StaffSpells {
 
             level.addFreshEntity(projectile);
             resetModifiers();
+        }
+    }
+
+    public void lightning_core(Player player, Level level) {if (level.isClientSide()) {return;}ServerLevel serverLevel = (ServerLevel) level;
+        int maxRange = 32;HitResult hitResult = player.pick(maxRange, 0.0f, false);
+        if (hitResult.getType() != HitResult.Type.BLOCK) {
+            return;
+        }BlockHitResult blockHit = (BlockHitResult) hitResult;
+        BlockPos targetPos = blockHit.getBlockPos().relative(blockHit.getDirection());
+        Vec3 centerVec = Vec3.atBottomCenterOf(targetPos);LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(serverLevel);
+        if (lightningBolt != null) {
+            lightningBolt.moveTo(centerVec);if (player instanceof ServerPlayer serverPlayer) {
+                lightningBolt.setCause(serverPlayer);
+            }
+
+            serverLevel.addFreshEntity(lightningBolt);
         }
     }
 
