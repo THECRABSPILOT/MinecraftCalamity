@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "minecraftcalamity:item/glyph/glyphbase",
+    "layer1": "minecraftcalamity:item/glyph/common"
+  }
+}

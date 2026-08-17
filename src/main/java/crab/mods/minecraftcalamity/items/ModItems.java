@@ -190,6 +190,32 @@ public class ModItems {
     public static final RegistryObject<Item> SCULK_AXE = ITEMS.register("sculk_axe",
             () -> new AxeItem(Tiers.IRON, 3, -2.4f, new Item.Properties()));
 
+
+
+    //GLYPHS
+    public static final RegistryObject<Item> COMMON_GLYPH = ITEMS.register("common_glyph",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> UNCOMMON_GLYPH = ITEMS.register("uncommon_glyph",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> RARE_GLYPH = ITEMS.register("rare_glyph",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> EPIC_GLYPH = ITEMS.register("epic_glyph",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> LEGENDARY_GLYPH = ITEMS.register("legendary_glyph",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> SPECIAL_GLYPH = ITEMS.register("special_glyph",
+            () -> new Item(new Item.Properties()));
+
+    //
+    public static final RegistryObject<Item> WEAVER_BOOK = ITEMS.register("weaver_book",
+            () -> new WeaverBookItem(new Item.Properties()));
+
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

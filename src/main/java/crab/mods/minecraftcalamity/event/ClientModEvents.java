@@ -7,12 +7,14 @@ import crab.mods.minecraftcalamity.client.renderer.DiviniumBlockEntityRenderer;
 import crab.mods.minecraftcalamity.client.renderer.EtheriumBlockRenderer;
 import crab.mods.minecraftcalamity.client.renderer.PedestalBlockEntityRenderer;
 import crab.mods.minecraftcalamity.client.screen.ArcaneWorkbenchScreen;
+import crab.mods.minecraftcalamity.client.screen.WeaverScreen;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
 import crab.mods.minecraftcalamity.entity.client.*;
 import crab.mods.minecraftcalamity.items.CalamitieArmorItem;
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
+import crab.mods.minecraftcalamity.menu.WeaverMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.PlayerModel;
@@ -61,7 +63,7 @@ public class ClientModEvents {
 
             MenuScreens.register(ModMenuTypes.HELLFORGE_MENU.get(), HellforgeScreen::new);
             MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH_MENU.get(), ArcaneWorkbenchScreen::new);
-
+            MenuScreens.register(ModMenuTypes.WEAVER_MENU.get(), WeaverScreen::new);
 
             if (SWORD_IN_STONE != null && SWORD_IN_STONE.get() != null) {
                 ItemBlockRenderTypes.setRenderLayer(SWORD_IN_STONE.get(), RenderType.cutout());
