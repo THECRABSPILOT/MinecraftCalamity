@@ -22,7 +22,7 @@ public class PlayerMana {
         int bonusMana = 0;
         if (player != null) {
             // Check accessory capability slots for Mana Star using its item tag
-            bonusMana += player.getCapability(crab.mods.minecraftcalamity.accessory.AccessoryCapability.ACCESSORY_CAP)
+            bonusMana += player.getCapability(AccessoryCapability.ACCESSORY_CAP)
                     .map(cap -> {
                         int count = 0;
                         var inv = cap.getInventory();

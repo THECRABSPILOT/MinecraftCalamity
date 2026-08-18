@@ -23,7 +23,7 @@ public class SatchelItem extends Item {
     }
 
     public static ItemStackHandler getContents(ItemStack satchel) {
-        // Custom handler that ONLY accepts potions (or empty)
+
         ItemStackHandler handler = new ItemStackHandler(9) {
             @Override
             public boolean isItemValid(int slot, @NotNull ItemStack stack) {
@@ -50,7 +50,6 @@ public class SatchelItem extends Item {
 
         ItemStack heldStack = slot.getItem();
 
-        // Hard reject non-potions
         if (!heldStack.isEmpty() && !(heldStack.getItem() instanceof PotionItem)) {
             return false;
         }
@@ -58,7 +57,7 @@ public class SatchelItem extends Item {
         ItemStackHandler handler = getContents(satchel);
 
         if (heldStack.isEmpty()) {
-            // Take an item out (from the end)
+
             for (int i = 8; i >= 0; i--) {
                 ItemStack stored = handler.getStackInSlot(i);
                 if (!stored.isEmpty()) {
@@ -69,7 +68,7 @@ public class SatchelItem extends Item {
                 }
             }
         } else {
-            // Put the potion into the first empty slot
+
             for (int i = 0; i < 9; i++) {
                 if (handler.getStackInSlot(i).isEmpty()) {
                     handler.setStackInSlot(i, heldStack.copy());
@@ -85,8 +84,6 @@ public class SatchelItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         tooltipComponents.add(Component.literal("§7Can Hold 9 Potions and switch the hotbar to these potions"));
-        boolean active = stack.hasTag() && stack.getTag().getBoolean("Active");
-        tooltipComponents.add(Component.literal(active ? "§a§lACTIVE – Hotbar locked to potions only" : "§7Inactive"));
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
 }

@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.accessory;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;

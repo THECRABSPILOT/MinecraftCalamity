@@ -75,7 +75,6 @@ public class OreSightClient {
 
         PoseStack poseStack = event.getPoseStack();
 
-        // Force see-through
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
@@ -92,7 +91,7 @@ public class OreSightClient {
         Matrix4f matrix = poseStack.last().pose();
         BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 
-        // Yellow Spelunker color
+
         float r = 1.0f, g = 0.85f, b = 0.1f, a = 0.9f;
 
         buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
@@ -106,7 +105,7 @@ public class OreSightClient {
 
         poseStack.popPose();
 
-        // Restore
+
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
@@ -120,7 +119,7 @@ public class OreSightClient {
         float maxY = (float) box.maxY;
         float maxZ = (float) box.maxZ;
 
-        // Bottom face
+
         buffer.vertex(matrix, minX, minY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, maxX, minY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, maxX, minY, minZ).color(r, g, b, a).endVertex();
@@ -130,7 +129,7 @@ public class OreSightClient {
         buffer.vertex(matrix, minX, minY, maxZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, minX, minY, minZ).color(r, g, b, a).endVertex();
 
-        // Top face
+
         buffer.vertex(matrix, minX, maxY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, maxX, maxY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, maxX, maxY, minZ).color(r, g, b, a).endVertex();
@@ -140,7 +139,7 @@ public class OreSightClient {
         buffer.vertex(matrix, minX, maxY, maxZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, minX, maxY, minZ).color(r, g, b, a).endVertex();
 
-        // Vertical edges
+
         buffer.vertex(matrix, minX, minY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, minX, maxY, minZ).color(r, g, b, a).endVertex();
         buffer.vertex(matrix, maxX, minY, minZ).color(r, g, b, a).endVertex();

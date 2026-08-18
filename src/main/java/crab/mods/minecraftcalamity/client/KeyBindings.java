@@ -5,12 +5,8 @@ import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.network.AccessoriesC2SPacket;
 import crab.mods.minecraftcalamity.network.ModMessages;
 import crab.mods.minecraftcalamity.network.OpenAccessoryMenuC2SPacket;
-// Import your new packet here
-// import crab.mods.minecraftcalamity.network.YourNewActionC2SPacket;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -22,11 +18,11 @@ public class KeyBindings {
 
     public static final String KEY_CATEGORY = "key.categories." + MinecraftCalamity.MODID;
 
-    // Keybind description strings
+
     public static final String KEY_OPEN_ACCESSORIES = "key." + MinecraftCalamity.MODID + ".open_accessories";
     public static final String KEY_CHECK_SATCHEL = "key." + MinecraftCalamity.MODID + ".open_satchel";
 
-    // Original keybind
+
     public static final KeyMapping ACCESSORY_KEY = new KeyMapping(
             KEY_OPEN_ACCESSORIES,
             InputConstants.Type.KEYSYM,

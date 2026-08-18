@@ -1,6 +1,6 @@
 package crab.mods.minecraftcalamity.network;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.items.accessory.SatchelItem;
 import net.minecraft.nbt.CompoundTag;

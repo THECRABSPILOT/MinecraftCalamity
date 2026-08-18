@@ -1,6 +1,6 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.alchemy;
 
-import crab.mods.minecraftcalamity.items.potion.ModPotions;
+import crab.mods.minecraftcalamity.items.ModItems;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;

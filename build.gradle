@@ -178,13 +178,13 @@ dependencies {
 
 
 
-    runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.31+mc1.20.1")
+    //runtimeOnly fg.deobf("maven.modrinth:embeddium:0.3.31+mc1.20.1")
 
 
-    runtimeOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.7.0")
+    //runtimeOnly fg.deobf("maven.modrinth:oculus:1.20.1-1.7.0")
 
-    runtimeOnly fg.deobf("maven.modrinth:entitytexturefeatures:6.2.5")
-    runtimeOnly fg.deobf("maven.modrinth:entity-model-features:2.4.0")
+    //runtimeOnly fg.deobf("maven.modrinth:entitytexturefeatures:6.2.5")
+    //runtimeOnly fg.deobf("maven.modrinth:entity-model-features:2.4.0")
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime

@@ -6,6 +6,8 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
+//kaboom
+
 public class TimeBomb extends MobEffect {
     public TimeBomb(MobEffectCategory pCategory, int pColor) {
         super(pCategory, pColor);

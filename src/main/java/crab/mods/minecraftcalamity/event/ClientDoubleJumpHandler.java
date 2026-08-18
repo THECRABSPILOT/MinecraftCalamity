@@ -1,8 +1,8 @@
 package crab.mods.minecraftcalamity.event;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
-import crab.mods.minecraftcalamity.items.CloudInAJar;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
+import crab.mods.minecraftcalamity.items.accessory.CloudInAJar;
 import crab.mods.minecraftcalamity.network.DoubleJumpPacket;
 import crab.mods.minecraftcalamity.network.ModMessages;
 import net.minecraft.client.Minecraft;
@@ -60,12 +60,12 @@ public class ClientDoubleJumpHandler {
 
     private static void performDoubleJump(LocalPlayer player) {
         Vec3 currentDelta = player.getDeltaMovement();
-        double jumpY = 0.45D; // Vertical jump height boost
+        double jumpY = 0.45D;
 
         if (player.isSprinting()) {
-            // Forward force vector based on player look direction
+
             Vec3 look = player.getLookAngle();
-            double sprintBoostMultiplier = 1.35D; // Boost existing horizontal speed by 35%
+            double sprintBoostMultiplier = 1.35D;
 
             player.setDeltaMovement(
                     currentDelta.x * sprintBoostMultiplier + (look.x * 0.15D),
@@ -76,7 +76,7 @@ public class ClientDoubleJumpHandler {
             player.setDeltaMovement(currentDelta.x, jumpY, currentDelta.z);
         }
 
-        // Cloud particles
+
         for (int i = 0; i < 18; i++) {
             double xSpeed = (player.getRandom().nextDouble() - 0.5D) * 0.25D;
             double ySpeed = player.getRandom().nextDouble() * 0.05D;

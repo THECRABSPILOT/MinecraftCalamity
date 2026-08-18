@@ -19,7 +19,7 @@ public class ModEffects {
             () -> new TimeBomb(MobEffectCategory.NEUTRAL, 0x53ed7c));
 
     public static final RegistryObject<MobEffect> ORE_SIGHT = MOB_EFFECTS.register("ore_sight",
-            () -> new OreSight(MobEffectCategory.BENEFICIAL, 0xfccf03)); // ← fixed
+            () -> new OreSight(MobEffectCategory.BENEFICIAL, 0xfccf03));
 
     public static void register(IEventBus eventBus) {
         MOB_EFFECTS.register(eventBus);

@@ -1,15 +1,12 @@
 package crab.mods.minecraftcalamity.blocks.entity;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
-import crab.mods.minecraftcalamity.blocks.entity.DiviniumBlockEntity;
-import crab.mods.minecraftcalamity.blocks.entity.EtheriumBlockEntity;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import crab.mods.minecraftcalamity.blocks.entity.PedestalBlockEntity;
 
 public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
@@ -31,15 +28,6 @@ public class ModBlockEntities {
                     BlockEntityType.Builder.of(PedestalBlockEntity::new,
                             ModBlocks.PEDESTAL_BLOCK.get()).build(null));
 
-    public static final RegistryObject<BlockEntityType<EtheriumBlockEntity>> ETHERIUM_BE =
-            BLOCK_ENTITIES.register("etherium_be", () ->
-                    BlockEntityType.Builder.of(EtheriumBlockEntity::new,
-                            ModBlocks.ETHERIUM_BLOCK.get()).build(null));
-
-    public static final RegistryObject<BlockEntityType<DiviniumBlockEntity>> DIVINIUM_BE =
-            BLOCK_ENTITIES.register("divinium_be", () ->
-                    BlockEntityType.Builder.of(DiviniumBlockEntity::new,
-                            ModBlocks.DIVINIUM_BLOCK.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

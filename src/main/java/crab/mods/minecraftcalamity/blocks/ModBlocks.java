@@ -19,13 +19,11 @@ public class ModBlocks {
     public static final RegistryObject<Block> CALAMITITE_ORE = BLOCKS.register("calamitite_ore",
             () -> new DropExperienceBlock(
                     BlockBehaviour.Properties.of()
-                            .mapColor(MapColor.STONE)
                             .requiresCorrectToolForDrops()
                             .strength(3.0F, 3.0F),
                     ConstantInt.of(2)
             ));
 
-    // Updated to use HellforgeBlock
     public static final RegistryObject<Block> HELLFORGE = BLOCKS.register("hellforge",
             () -> new HellforgeBlock(BlockBehaviour.Properties.of()
                     .strength(3.5F, 6.0F)
@@ -45,20 +43,11 @@ public class ModBlocks {
                     .strength(3.0f, 6.0f)
                     .noOcclusion()));
 
-    public static final RegistryObject<Block> ETHERIUM_BLOCK = BLOCKS.register("etherium_block",
-            () -> new EtheriumBlock(BlockBehaviour.Properties.of()
-                    .strength(3.0f, 6.0f)
-                    .noOcclusion()));
-
-    public static final RegistryObject<Block> DIVINIUM_BLOCK = BLOCKS.register("divinium_block",
-            () -> new DiviniumBlock(BlockBehaviour.Properties.of()
-                    .strength(3.0f, 6.0f)
-                    .noOcclusion()));
 
     public static final RegistryObject<Block> SWORD_IN_STONE = BLOCKS.register("sword_in_stone",
             () -> new SwordInStoneBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.STONE)
-                    .strength(4.0f, 6.0f) // Adjust hardness/resistance as desired
+                    .strength(4.0f, 6.0f)
                     .requiresCorrectToolForDrops()
 
             ));

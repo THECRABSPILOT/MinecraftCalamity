@@ -1,5 +1,6 @@
 package crab.mods.minecraftcalamity.event;
 
+import crab.mods.minecraftcalamity.CalamityConfig;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -11,7 +12,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -20,13 +20,16 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.Random;
 
+
+//IT FINALLY WORKS!!!!!
+
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class NightRaidHandler {
 
     private static boolean hasCheckedTonight = false;
     private static final Random RANDOM = new Random();
 
-    // Register a debug command /trigger_raid to test anytime
+
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
@@ -34,7 +37,7 @@ public class NightRaidHandler {
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> {
                     ServerLevel level = context.getSource().getLevel();
-                    context.getSource().sendSuccess(() -> Component.literal("§a[Debug] Forcing Raid Trigger..."), true);
+                    context.getSource().sendSuccess(() -> Component.literal("Forcing Raid Nearby"), true);
                     triggerVillageRaid(level);
                     return 1;
                 }));
@@ -46,51 +49,62 @@ public class NightRaidHandler {
             return;
         }
 
-        long dayTime = level.getDayTime() % 24000;
+        if (!level.dimension().equals(ServerLevel.OVERWORLD)) {
+            return;
+        }
 
-        // Reset check during daytime (0 to 12000)
+        long dayTime = Math.floorMod(level.getDayTime(), 24000L);
+
+
         if (dayTime < 12000) {
             hasCheckedTonight = false;
             return;
         }
 
-        // Check at dusk (between 12500 and 13000)
-        if (!hasCheckedTonight && dayTime >= 12500 && dayTime < 13000) {
+
+        if (!hasCheckedTonight && dayTime >= 12500) {
             hasCheckedTonight = true;
 
-            // 1 in 4 chance (25%)
-            if (RANDOM.nextInt(4) == 0) {
-                triggerVillageRaid(level);
+
+            if (CalamityConfig.DONIGHTRAIDS.get()) {
+
+
+                int chance = CalamityConfig.NIGHTRAIDCHANCE.get();
+
+                if (RANDOM.nextInt(chance) == 0) {
+                    triggerVillageRaid(level);
+                }
             }
         }
     }
 
     public static void triggerVillageRaid(ServerLevel level) {
-        if (level.players().isEmpty()) return;
+        if (level.players().isEmpty()) {
+            return;
+        }
 
         for (ServerPlayer player : level.players()) {
             BlockPos playerPos = player.blockPosition();
 
-            // Find village structure
-            BlockPos villagePos = level.findNearestMapStructure(
-                    StructureTags.VILLAGE, playerPos, 100, true);
 
-            // Fallback: Use player position directly if null
+            BlockPos villagePos = level.findNearestMapStructure(
+                    StructureTags.VILLAGE, playerPos, 10, true);
+
             if (villagePos == null) {
                 villagePos = playerPos;
             }
 
             boolean isIllagerRaid = RANDOM.nextBoolean();
 
-            if (isIllagerRaid) {
-                spawnIllagerRaid(level, villagePos);
-                player.sendSystemMessage(Component.literal("§c[Warning] An Illager raid is attacking a nearby village!"));
-            } else {
-                spawnZombieRaid(level, villagePos);
-                player.sendSystemMessage(Component.literal("§4[Warning] A massive Zombie siege has begun at a nearby village!"));
+            if (!level.isClientSide) {
+                if (isIllagerRaid) {
+                    spawnIllagerRaid(level, villagePos);
+                } else {
+                    spawnZombieRaid(level, villagePos);
+                }
             }
 
-            break; // Stop after executing once per check
+            break;
         }
     }
 
@@ -129,7 +143,6 @@ public class NightRaidHandler {
             if (mob != null) {
                 mob.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, RANDOM.nextFloat() * 360F, 0.0F);
                 mob.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.EVENT, null, null);
-
                 level.addFreshEntity(mob);
             }
         }

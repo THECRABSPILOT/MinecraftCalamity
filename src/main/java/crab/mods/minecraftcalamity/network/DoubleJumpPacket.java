@@ -1,7 +1,7 @@
 package crab.mods.minecraftcalamity.network;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
-import crab.mods.minecraftcalamity.items.CloudInAJar;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
+import crab.mods.minecraftcalamity.items.accessory.CloudInAJar;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;

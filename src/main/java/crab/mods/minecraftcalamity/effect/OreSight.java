@@ -6,16 +6,16 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class OreSight extends MobEffect {
     public OreSight(MobEffectCategory category, int color) {
-        super(category, color); // BENEFICIAL + 0xFFD700 recommended
+        super(category, color);
     }
 
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
-        // empty on purpose – all logic is client-side
+
     }
 
     @Override
     public boolean isDurationEffectTick(int duration, int amplifier) {
-        return false; // no need to tick every frame
+        return false;
     }
 }

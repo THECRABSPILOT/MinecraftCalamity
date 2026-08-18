@@ -8,10 +8,9 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity; // FIXED: Correct Minecraft Entity import
+import net.minecraft.world.entity.Entity;
 
 public class CaveWizardModel<T extends Entity> extends EntityModel<T> {
-	// Remember to change "modid" to your actual registered Mod ID
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("minecraftcalamity", "cavewizard"), "main");
 
 	private final ModelPart Waist;
@@ -41,7 +40,7 @@ public class CaveWizardModel<T extends Entity> extends EntityModel<T> {
 		PartDefinition Head = Waist.addOrReplaceChild("Head", CubeListBuilder.create().texOffs(0, 36).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
 				.texOffs(42, 20).addBox(-4.0F, -2.0F, -4.0F, 8.0F, 2.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.offset(0.0F, -12.0F, 0.0F));
 
-		// FIXED: Removed duplicate type styling from Blockbench naming bugs
+
 		PartDefinition Head_r1 = Head.addOrReplaceChild("Head_r1", CubeListBuilder.create().texOffs(58, 49).addBox(-2.0F, -3.0F, -2.0F, 5.0F, 5.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -12.0F, 4.0F, -0.9163F, 0.0F, 0.0F));
 
 		PartDefinition Head_r2 = Head.addOrReplaceChild("Head_r2", CubeListBuilder.create().texOffs(32, 36).addBox(-4.0F, -3.0F, -2.0F, 9.0F, 5.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -10.0F, 1.0F, -0.6109F, 0.0F, 0.0F));
@@ -62,13 +61,13 @@ public class CaveWizardModel<T extends Entity> extends EntityModel<T> {
 		PartDefinition Right_Leg = Waist.addOrReplaceChild("Right Leg", CubeListBuilder.create().texOffs(66, 30).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))
 				.texOffs(74, 14).addBox(-2.0F, 5.0F, -2.0F, 4.0F, 7.0F, 4.0F, new CubeDeformation(0.25F)), PartPose.offset(-1.9F, 0.0F, 0.0F));
 
-		// FIXED: Cleaned up variable name type mismatch
+
 		PartDefinition Right_Leg_Layer_r1 = Right_Leg.addOrReplaceChild("Right Leg Layer_r1", CubeListBuilder.create().texOffs(54, 30).addBox(-0.9F, -1.0F, -1.0F, 3.0F, 1.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.1F, 12.0F, -3.0F, 0.0F, -0.7854F, 0.0F));
 
 		PartDefinition Left_Leg = Waist.addOrReplaceChild("Left Leg", CubeListBuilder.create().texOffs(40, 66).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))
 				.texOffs(74, 60).addBox(-2.0F, 5.0F, -2.0F, 4.0F, 7.0F, 4.0F, new CubeDeformation(0.25F)), PartPose.offset(1.9F, 0.0F, 0.0F));
 
-		// FIXED: Cleaned up variable name type mismatch
+
 		PartDefinition Left_Leg_Layer_r1 = Left_Leg.addOrReplaceChild("Left Leg Layer_r1", CubeListBuilder.create().texOffs(42, 30).addBox(-1.1F, -1.0F, -1.0F, 3.0F, 1.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.1F, 12.0F, -3.0F, 0.0F, -0.7854F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
@@ -76,7 +75,7 @@ public class CaveWizardModel<T extends Entity> extends EntityModel<T> {
 
 	@Override
 	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		// Use this space to apply animations like leg/arm swing mechanics
+
 	}
 
 	@Override

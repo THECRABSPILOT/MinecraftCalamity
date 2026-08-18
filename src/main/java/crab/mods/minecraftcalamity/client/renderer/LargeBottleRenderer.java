@@ -2,7 +2,7 @@ package crab.mods.minecraftcalamity.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import crab.mods.minecraftcalamity.items.LargeBottleItem;
+import crab.mods.minecraftcalamity.items.alchemy.LargeBottleItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;

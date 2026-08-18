@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.magicitems;
 
 import crab.mods.minecraftcalamity.entity.custom.SwordProjectileEntity;
 import net.minecraft.network.chat.Component;

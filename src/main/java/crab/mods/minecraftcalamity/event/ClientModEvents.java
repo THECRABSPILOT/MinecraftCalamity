@@ -3,27 +3,20 @@ package crab.mods.minecraftcalamity.event;
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.client.gui.HellforgeScreen;
 import crab.mods.minecraftcalamity.client.model.CalamititeChampionArmorModel;
-import crab.mods.minecraftcalamity.client.renderer.DiviniumBlockEntityRenderer;
-import crab.mods.minecraftcalamity.client.renderer.EtheriumBlockRenderer;
 import crab.mods.minecraftcalamity.client.renderer.PedestalBlockEntityRenderer;
+import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
 import crab.mods.minecraftcalamity.client.screen.ArcaneWorkbenchScreen;
 import crab.mods.minecraftcalamity.client.screen.WeaverScreen;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
 import crab.mods.minecraftcalamity.entity.client.*;
 import crab.mods.minecraftcalamity.items.CalamitieArmorItem;
-import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
-import crab.mods.minecraftcalamity.menu.WeaverMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -34,17 +27,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import crab.mods.minecraftcalamity.capability.ManaCapabilityProvider;
-import crab.mods.minecraftcalamity.client.renderer.LargeBottleRenderer;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-
-
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-
-import static crab.mods.minecraftcalamity.blocks.ModBlocks.SWORD_IN_STONE;
+import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
 
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientModEvents {
@@ -60,14 +46,13 @@ public class ClientModEvents {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-
+            //register uis
+            MenuScreens.register(ModMenuTypes.ACCESSORY_MENU.get(), AccessoryScreen::new);
             MenuScreens.register(ModMenuTypes.HELLFORGE_MENU.get(), HellforgeScreen::new);
             MenuScreens.register(ModMenuTypes.ARCANE_WORKBENCH_MENU.get(), ArcaneWorkbenchScreen::new);
             MenuScreens.register(ModMenuTypes.WEAVER_MENU.get(), WeaverScreen::new);
 
-            if (SWORD_IN_STONE != null && SWORD_IN_STONE.get() != null) {
-                ItemBlockRenderTypes.setRenderLayer(SWORD_IN_STONE.get(), RenderType.cutout());
-            }
+
 
             BlockEntityRenderers.register(
                     crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.PEDESTAL_BE.get(),
@@ -93,10 +78,9 @@ public class ClientModEvents {
         event.registerEntityRenderer(ModEntityTypes.CAVE_WIZARD.get(), CaveWizardRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.DYNAMIC_PROJECTILE.get(), DynamicProjectileRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.SWORD_PROJECTILE.get(), SwordProjectileRenderer::new);
-        event.registerBlockEntityRenderer(crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.ETHERIUM_BE.get(), EtheriumBlockRenderer::new);
-        event.registerBlockEntityRenderer(crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities.DIVINIUM_BE.get(), DiviniumBlockEntityRenderer::new);
-    }
 
+    }
+//forge client events
     @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeClientEvents {
 
@@ -122,6 +106,8 @@ public class ClientModEvents {
                 model.leftPants.visible = false;
                 model.rightPants.visible = false;
             }
+
+            //and yet i still have to fix the stupid boots showing when you equip the leggings
         }
 
         @SubscribeEvent
@@ -171,8 +157,8 @@ public class ClientModEvents {
 
             boolean holdingMagicItem = player.getMainHandItem().getItem() instanceof SpellBookItem
                     || player.getOffhandItem().getItem() instanceof SpellBookItem
-                    || player.getMainHandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem
-                    || player.getOffhandItem().getItem() instanceof crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
+                    || player.getMainHandItem().getItem() instanceof ModularStaffItem
+                    || player.getOffhandItem().getItem() instanceof ModularStaffItem;
 
             if (holdingMagicItem) {
                 player.getCapability(ManaCapabilityProvider.PLAYER_MANA).ifPresent(mana -> {

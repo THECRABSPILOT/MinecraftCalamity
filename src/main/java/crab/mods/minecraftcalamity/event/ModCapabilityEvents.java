@@ -29,7 +29,7 @@ public class ModCapabilityEvents {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && !event.player.level().isClientSide()) {
-            // Natural passive mana regeneration loop (1 point every second / 20 ticks)
+
             if (event.player.tickCount % 20 == 0) {
                 event.player.getCapability(ManaCapabilityProvider.PLAYER_MANA).ifPresent(mana -> {
                     mana.regenMana(event.player, 1);

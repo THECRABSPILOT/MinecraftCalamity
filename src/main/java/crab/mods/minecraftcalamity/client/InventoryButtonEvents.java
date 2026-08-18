@@ -15,24 +15,23 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID, value = Dist.CLIENT)
 public class InventoryButtonEvents {
 
-    // Using Curios' classic texture location style or a custom icon
+
     private static final ResourceLocation BUTTON_TEX =
             new ResourceLocation("minecraftcalamity", "textures/gui/container/invic.png");
 
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
-        // Check if the opened screen is the player's vanilla 'E' inventory
+
         if (event.getScreen() instanceof InventoryScreen gui) {
             int left = gui.getGuiLeft();
             int top = gui.getGuiTop();
 
-            // Position the button next to the craft book / recipe icon (x: left + 27, y: top + 62)
+
             ImageButton accessoryButton = new ImageButton(
-                    left + 27, top + 62, 9, 9, // x, y, width, height
-                    0, 0, 0,                   // texture offset
+                    left + 27, top + 62, 9, 9,
+                    0, 0, 0,
                     BUTTON_TEX, 256, 256,
                     button -> {
-                        // Send network packet to server to open your menu when clicked
                         ModMessages.sendToServer(new OpenAccessoryMenuC2SPacket());
                     }
 

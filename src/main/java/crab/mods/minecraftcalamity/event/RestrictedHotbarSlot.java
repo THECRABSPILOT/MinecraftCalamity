@@ -1,6 +1,6 @@
 package crab.mods.minecraftcalamity.event;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import crab.mods.minecraftcalamity.items.ModItems;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;

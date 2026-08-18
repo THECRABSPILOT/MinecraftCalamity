@@ -1,6 +1,5 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.accessory;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;

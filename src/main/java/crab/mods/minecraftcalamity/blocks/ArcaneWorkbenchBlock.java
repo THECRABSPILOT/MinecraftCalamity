@@ -64,10 +64,7 @@ public class ArcaneWorkbenchBlock extends BaseEntityBlock {
         if (!level.isClientSide) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof ArcaneWorkbenchBlockEntity workbenchBlockEntity) {
-                // Fixed NetworkHooks signature to pass BlockPos over FriendlyByteBuf
                 NetworkHooks.openScreen((ServerPlayer) player, workbenchBlockEntity, posBuf -> posBuf.writeBlockPos(pos));
-            } else {
-                throw new IllegalStateException("Container provider is missing!");
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

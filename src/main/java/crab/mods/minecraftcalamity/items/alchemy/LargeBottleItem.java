@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.alchemy;
 
 import crab.mods.minecraftcalamity.client.renderer.LargeBottleRenderer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;

@@ -1,16 +1,15 @@
 package crab.mods.minecraftcalamity;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import crab.mods.minecraftcalamity.blocks.ModBlocks;
 import crab.mods.minecraftcalamity.blocks.entity.ModBlockEntities;
 import crab.mods.minecraftcalamity.client.screen.AccessoryScreen;
-import crab.mods.minecraftcalamity.config.CalamityConfig;
 import crab.mods.minecraftcalamity.effect.ModEffects;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
 import crab.mods.minecraftcalamity.entity.custom.CaveWizardEntity;
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
-import crab.mods.minecraftcalamity.items.potion.ModPotions;
+import crab.mods.minecraftcalamity.items.alchemy.ModPotions;
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import crab.mods.minecraftcalamity.menu.ModMenuTypes;
 import crab.mods.minecraftcalamity.network.ModMessages;
@@ -57,12 +56,12 @@ public class MinecraftCalamity {
 
     public static final String MODID = "minecraftcalamity";
 
-    // Deferred Registers
+
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    // Register Creative Tab
+
     public static final RegistryObject<CreativeModeTab> CALAMITY_TAB = CREATIVE_MODE_TABS.register("calamity_tab",
             () -> CreativeModeTab.builder()
                     .icon(() -> new ItemStack(ModItems.HELLFORGE.get())) // Icon displayed on tab header
@@ -91,8 +90,8 @@ public class MinecraftCalamity {
         ModMessages.register();
 
 
-        modEventBus.addListener(this::clientSetup);
-        modEventBus.addListener(this::commonSetup);
+        //modEventBus.addListener(this::clientSetup);
+        //modEventBus.addListener(this::commonSetup);
 
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CalamityConfig.SPEC);
@@ -101,36 +100,7 @@ public class MinecraftCalamity {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void clientSetup(final FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            MenuScreens.register(ModMenuTypes.ACCESSORY_MENU.get(), AccessoryScreen::new);
-        });
-    }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-
-            SpawnPlacements.register(
-                    ModEntityTypes.CAVE_WIZARD.get(),
-                    SpawnPlacements.Type.ON_GROUND,
-                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                    CaveWizardEntity::checkCaveWizardSpawnRules
-            );
-
-
-            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
-                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.LEAPING)),
-                    Ingredient.of(ModItems.SHULKER_MEAT.get()),
-                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.LEVITATION_POTION.get())
-            ));
-
-            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
-                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION)),
-                    Ingredient.of(ModItems.MANA_STAR.get()),
-                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.MANA_BREW.get())
-            ));
-        });
-    }
 
 
     public static void openAccessoryMenu(ServerPlayer player) {
@@ -143,43 +113,6 @@ public class MinecraftCalamity {
         );
     }
 
-    // =========================================================
-    // ACCESSORY SYNC EVENT LISTENERS
-    // =========================================================
-
-    @SubscribeEvent
-    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
-        if (!event.getLevel().isClientSide() && event.getEntity() instanceof ServerPlayer player) {
-            syncAccessories(player);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            syncAccessories(player);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            syncAccessories(player);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onContainerClose(PlayerContainerEvent.Close event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            syncAccessories(player);
-        }
-    }
-
-    public static void syncAccessories(ServerPlayer player) {
-        player.getCapability(AccessoryCapability.ACCESSORY_CAP).ifPresent(cap -> {
-            ModMessages.sendToPlayer(new SyncAccessoriesS2CPacket(cap.serializeNBT()), player);
-        });
-    }
 
     @SubscribeEvent
     public static void onLeftClickMouse(InputEvent.MouseButton.Pre event) {

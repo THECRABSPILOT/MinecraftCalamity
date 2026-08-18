@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.items;
+package crab.mods.minecraftcalamity.items.accessory;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -17,7 +17,7 @@ public class CloudInAJar extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
-        tooltipComponents.add(Component.literal("§7Allows the holder to double jump."));
+        tooltipComponents.add(Component.literal("§7Lets you double jump."));
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
 }

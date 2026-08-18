@@ -32,23 +32,23 @@ public class HellforgeBlock extends BaseEntityBlock {
 
     public HellforgeBlock(Properties properties) {
         super(properties);
-        // Default facing direction
+
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
-    // Set orientation opposite of the player when placed
+
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
-    // Handle block rotation commands or structure blocks
+
     @Override
     public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
-    // Handle block mirroring
+
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
@@ -70,8 +70,6 @@ public class HellforgeBlock extends BaseEntityBlock {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof HellforgeBlockEntity hellforgeBlockEntity) {
                 NetworkHooks.openScreen((ServerPlayer) player, hellforgeBlockEntity, pos);
-            } else {
-                throw new IllegalStateException("Container provider is missing!");
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

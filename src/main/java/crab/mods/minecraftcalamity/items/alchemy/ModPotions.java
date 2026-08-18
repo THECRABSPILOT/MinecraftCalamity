@@ -1,8 +1,7 @@
-package crab.mods.minecraftcalamity.items.potion;
+package crab.mods.minecraftcalamity.items.alchemy;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
 import crab.mods.minecraftcalamity.effect.ModEffects;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;

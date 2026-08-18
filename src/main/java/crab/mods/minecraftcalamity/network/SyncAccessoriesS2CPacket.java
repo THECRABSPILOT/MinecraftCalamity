@@ -1,6 +1,6 @@
 package crab.mods.minecraftcalamity.network;
 
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.accessory;
+package crab.mods.minecraftcalamity.capability;
 
 import crab.mods.minecraftcalamity.menu.AccessoryMenu;
 import net.minecraft.core.Direction;

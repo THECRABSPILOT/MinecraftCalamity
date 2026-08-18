@@ -1,7 +1,7 @@
 package crab.mods.minecraftcalamity.menu;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;

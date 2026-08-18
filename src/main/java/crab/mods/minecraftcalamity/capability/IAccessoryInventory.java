@@ -1,4 +1,4 @@
-package crab.mods.minecraftcalamity.accessory;
+package crab.mods.minecraftcalamity.capability;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;

@@ -1,50 +1,44 @@
 package crab.mods.minecraftcalamity.event;
 
 import crab.mods.minecraftcalamity.MinecraftCalamity;
-import crab.mods.minecraftcalamity.accessory.AccessoryCapability;
+import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import crab.mods.minecraftcalamity.entity.ModEntityTypes;
+import crab.mods.minecraftcalamity.entity.custom.CaveWizardEntity;
 import crab.mods.minecraftcalamity.items.ModItems;
-import crab.mods.minecraftcalamity.items.potion.ModPotions;
+import crab.mods.minecraftcalamity.items.alchemy.ModPotions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.items.ItemStackHandler;
 
 @Mod.EventBusSubscriber(modid = MinecraftCalamity.MODID)
 public class ModEvents {
-
-
-
-
     @SubscribeEvent
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!event.getLevel().isClientSide() && event.getLevel() instanceof ServerLevel serverLevel) {
-            BlockPos pos = event.getPos();
-
-            // Find any slime marker at this exact broken block position and discard it
-            serverLevel.getEntitiesOfClass(Slime.class, new AABB(pos),
-                    slime -> slime.getPersistentData().getBoolean("OreSightMarker")).forEach(Slime::discard);
-        }
+    public static void registerAttributes(EntityAttributeCreationEvent event) {
+        event.put(ModEntityTypes.CAVE_WIZARD.get(), CaveWizardEntity.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -72,21 +66,19 @@ public class ModEvents {
     }
 
 
-    public static boolean hasAccessoryEquipped(Player player, Item targetAccessory) {
-        // Fetch the accessory capability from the player instance
-        return player.getCapability(AccessoryCapability.ACCESSORY_CAP).map(accessor -> {
-            ItemStackHandler handler = accessor.getInventory();
-
-            // Loop through all 8 accessory slots
-            for (int i = 0; i < handler.getSlots(); i++) {
-                ItemStack stack = handler.getStackInSlot(i);
-                if (!stack.isEmpty() && stack.is(targetAccessory)) {
-                    return true; // Found the accessory equipped!
-                }
-            }
-            return false;
-        }).orElse(false); // Return false if capability is missing
-    }
+    //public static boolean hasAccessoryEquipped(Player player, Item targetAccessory) {
+    //    return player.getCapability(AccessoryCapability.ACCESSORY_CAP).map(accessor -> {
+    //        ItemStackHandler handler = accessor.getInventory();
+    //       for (int i = 0; i < handler.getSlots(); i++) {
+    //          ItemStack stack = handler.getStackInSlot(i);
+    //            if (!stack.isEmpty() && stack.is(targetAccessory)) {
+    //                return true;
+    //            }
+    //        }
+    //        return false;
+    //    }).orElse(false);
+    // }
+    //says never used but ill test that
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -104,11 +96,8 @@ public class ModEvents {
 
     private static void replaceHotbarSlots(ServerPlayer player) {
         var menu = player.inventoryMenu;
-
         for (int i = 0; i < menu.slots.size(); i++) {
             Slot old = menu.slots.get(i);
-
-            // Only touch the real hotbar slots (player inventory, slot index 0-8)
             if (old.container == player.getInventory() && old.getSlotIndex() >= 0 && old.getSlotIndex() < 9) {
                 menu.slots.set(i, new RestrictedHotbarSlot(
                         old.container,
@@ -119,6 +108,32 @@ public class ModEvents {
                 ));
             }
         }
+    }
+
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+
+            SpawnPlacements.register(
+                    ModEntityTypes.CAVE_WIZARD.get(),
+                    SpawnPlacements.Type.ON_GROUND,
+                    Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    CaveWizardEntity::checkCaveWizardSpawnRules
+            );
+
+
+            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.LEAPING)),
+                    Ingredient.of(ModItems.SHULKER_MEAT.get()),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.LEVITATION_POTION.get())
+            ));
+
+            BrewingRecipeRegistry.addRecipe(new BrewingRecipe(
+                    Ingredient.of(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.REGENERATION)),
+                    Ingredient.of(ModItems.MANA_STAR.get()),
+                    PotionUtils.setPotion(new ItemStack(Items.POTION), ModPotions.MANA_BREW.get())
+            ));
+        });
     }
 
 
