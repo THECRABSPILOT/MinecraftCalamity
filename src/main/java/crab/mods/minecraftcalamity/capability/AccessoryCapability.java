@@ -19,12 +19,10 @@ public class AccessoryCapability implements ICapabilityProvider, INBTSerializabl
     public static final Capability<IAccessoryInventory> ACCESSORY_CAP =
             CapabilityManager.get(new CapabilityToken<IAccessoryInventory>() {});
 
-    // Override size behavior directly inside ItemStackHandler
     private final ItemStackHandler inventory = new ItemStackHandler(8) {
         @Override
         public void deserializeNBT(CompoundTag nbt) {
             super.deserializeNBT(nbt);
-            // CRITICAL FIX: Prevent Forge NBT loading from shrinking inventory to 4
             if (this.getSlots() < 8) {
                 this.setSize(8);
             }

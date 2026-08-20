@@ -67,7 +67,6 @@ public class MinecraftCalamity {
                     .icon(() -> new ItemStack(ModItems.HELLFORGE.get())) // Icon displayed on tab header
                     .title(Component.translatable("creativetab.minecraftcalamity.tab"))
                     .displayItems((parameters, output) -> {
-                        // Populates tab with all items registered in ModItems
                         ModItems.ITEMS.getEntries().forEach(item -> output.accept(item.get()));
                     })
                     .build());
@@ -89,9 +88,6 @@ public class MinecraftCalamity {
         ModPotions.register(modEventBus);
         ModMessages.register();
 
-
-        //modEventBus.addListener(this::clientSetup);
-        //modEventBus.addListener(this::commonSetup);
 
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CalamityConfig.SPEC);
@@ -116,43 +112,18 @@ public class MinecraftCalamity {
 
     @SubscribeEvent
     public static void onLeftClickMouse(InputEvent.MouseButton.Pre event) {
-        // Button 0 = Left Click, action 1 = Pressed down
+
         if (event.getButton() == 0 && event.getAction() == 1) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null && mc.screen == null) {
                 ItemStack mainHandItem = mc.player.getMainHandItem();
 
                 if (mainHandItem.getItem() instanceof SpellBookItem) {
-                    // Send packet to server to fire the active spell
                     ModMessages.sendToServer(new SpellCastPacket());
 
-                    // Cancel normal left-click behavior
                     event.setCanceled(true);
                 }
             }
         }
     }
-
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        // Check if the current tab being built is the vanilla Food & Drinks tab
-        if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
-
-            // 1. Create a regular potion itemstack and apply your custom potion registry object
-            ItemStack regularPotion = new ItemStack(Items.POTION);
-            PotionUtils.setPotion(regularPotion, ModPotions.MANA_BREW.get());
-            event.accept(regularPotion);
-
-            // 2. Create a splash potion itemstack
-            ItemStack splashPotion = new ItemStack(Items.SPLASH_POTION);
-            PotionUtils.setPotion(splashPotion, ModPotions.MANA_BREW.get());
-            event.accept(splashPotion);
-
-            // 3. Create a lingering potion itemstack
-            ItemStack lingeringPotion = new ItemStack(Items.LINGERING_POTION);
-            PotionUtils.setPotion(lingeringPotion, ModPotions.MANA_BREW.get());
-            event.accept(lingeringPotion);
-        }
-    }
-
-
 }

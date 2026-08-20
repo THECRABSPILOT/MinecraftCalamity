@@ -51,8 +51,6 @@ public class ModItems {
     public static final RegistryObject<Item> CALAMITITE_INGOT = ITEMS.register("calamitite_ingot",
             () -> new Item(new Item.Properties()));
 
-
-
     public static final RegistryObject<Item> AMETHYST_DUST = ITEMS.register("amethyst_dust",
             () -> new Item(new Item.Properties()));
 
@@ -118,8 +116,8 @@ public class ModItems {
     public static final RegistryObject<Item> SCULK_GRIMOIRE = ITEMS.register("sculk_grimoire",
             () -> new SpellBookItem(new Item.Properties().stacksTo(1), 8));
 
-    public static final RegistryObject<Item> WEAVER_BOOK = ITEMS.register("weaver_book",
-            () -> new WeaverBookItem(new Item.Properties()));  //W.I.P
+    //public static final RegistryObject<Item> WEAVER_BOOK = ITEMS.register("weaver_book",
+    //        () -> new WeaverBookItem(new Item.Properties()));  //probably wont work on dis for a while
 
 
     //BOOK SPELLS
@@ -146,6 +144,12 @@ public class ModItems {
 
     public static final RegistryObject<Item> CROSS_RING = ITEMS.register("cross_ring",
             () -> new AccessoryItem(new Item.Properties().stacksTo(1),"§7Grants Immunity to wither"));
+
+    public static final RegistryObject<Item> GLOVE = ITEMS.register("glove",
+            () -> new AccessoryItem(new Item.Properties().stacksTo(1),"§7Doesnt do much... yet"));
+
+    public static final RegistryObject<Item> HEATER_GLOVE = ITEMS.register("heater_glove",
+            () -> new AccessoryItem(new Item.Properties().stacksTo(1),"§7Instantly smelts mined things and melts connected snow"));
 
     public static final RegistryObject<Item> TEST_ACCESSORY = ITEMS.register("test_accessory",
             () -> new TestAccessoryItem(new Item.Properties().stacksTo(1)));

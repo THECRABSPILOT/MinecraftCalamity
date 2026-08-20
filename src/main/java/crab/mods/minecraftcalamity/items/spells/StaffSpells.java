@@ -63,7 +63,7 @@ public class StaffSpells {
         return modifiers;
     }
 
-    // --- MODIFIERS ---
+    //MODIFIERS
 
     public void bounce_modifier(Player player, Level level) {
         if (!level.isClientSide()) {
@@ -77,7 +77,7 @@ public class StaffSpells {
         }
     }
 
-    // --- PROJECTILES ---
+    //PROJECTILES
 
     public void fireball_core(Player player, Level level) {
         if (!level.isClientSide()) {

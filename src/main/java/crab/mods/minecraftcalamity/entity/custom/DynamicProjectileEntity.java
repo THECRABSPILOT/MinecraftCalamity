@@ -38,14 +38,13 @@ public class DynamicProjectileEntity extends Projectile implements IEntityAdditi
     int effectDuration = 100;
     int effectAmplifier = 0;
 
-    // Bounce & Split Properties
+
     private boolean canBounce = false;
     private int maxBounces = 3;
     private int bounceCount = 0;
     private boolean shouldSplitOnImpact = false;
     private int splitCount = 3;
 
-    // Particle & Visibility Properties
     private String trailParticle = null;
     private double particleSpread = 0.1D;
     private boolean singleParticle = false;
@@ -90,11 +89,10 @@ public class DynamicProjectileEntity extends Projectile implements IEntityAdditi
     public void tick() {
         super.tick();
 
-        // Server-side movement, acceleration, gravity, and collision logic
+
         if (!this.level().isClientSide()) {
             Vec3 motion = this.getDeltaMovement();
 
-            // Initialization if spawned without velocity vectors
             if (motion.lengthSqr() == 0) {
                 float yaw = this.getYRot();
                 float pitch = this.getXRot();
@@ -174,7 +172,6 @@ public class DynamicProjectileEntity extends Projectile implements IEntityAdditi
                 this.bounceCount++;
                 Vec3 motion = this.getDeltaMovement();
 
-                // Reflect movement vector based on hit face normal
                 switch (pResult.getDirection()) {
                     case UP, DOWN -> this.setDeltaMovement(motion.x, -motion.y, motion.z);
                     case NORTH, SOUTH -> this.setDeltaMovement(motion.x, motion.y, -motion.z);
@@ -205,7 +202,7 @@ public class DynamicProjectileEntity extends Projectile implements IEntityAdditi
             splitProjectile.setStats(currentSpeed, this.acceleration, this.gravity, this.hasGravity, this.damage * 0.5f, this.effectOnHit, this.effectDuration, this.effectAmplifier);
             splitProjectile.setParticleConfig(this.trailParticle, this.particleSpread, this.singleParticle, this.isInvisible());
 
-            // Spread out split velocities dynamically in a cone/circle
+
             double angle = (Math.PI * 2 / this.splitCount) * i;
             Vec3 spreadMotion = new Vec3(Math.cos(angle) * currentSpeed, 0.2D, Math.sin(angle) * currentSpeed);
             splitProjectile.setDeltaMovement(spreadMotion);
