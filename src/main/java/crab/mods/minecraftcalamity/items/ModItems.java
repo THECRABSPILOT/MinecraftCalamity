@@ -60,6 +60,8 @@ public class ModItems {
     public static final RegistryObject<Item> SCULK_TENDRIL = ITEMS.register("sculk_tendril",
             () -> new Item(new Item.Properties().stacksTo(64)));
 
+    public static final RegistryObject<Item> LAVA_TUBE = ITEMS.register("lava_tube",
+            () -> new Item(new Item.Properties().stacksTo(64)));
 
 
     //STAFFS
@@ -122,19 +124,19 @@ public class ModItems {
 
     //BOOK SPELLS
     public static final RegistryObject<Item> FIRE_FLIGHT = ITEMS.register("fire_flight",
-            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells","Allows ten seconds of flight"));
 
     public static final RegistryObject<Item> FIREBALL = ITEMS.register("fireball",
-            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells","Shoots a Fireball (Note: this is explosive and damages blocks)"));
 
     public static final RegistryObject<Item> INFERNAL_COLUMN = ITEMS.register("infernal_column",
-            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells"));
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "FireSpells","Summon a column of fire"));
 
     public static final RegistryObject<Item> SUMMON_GOLEM = ITEMS.register("summon_golem",
-            () -> new SpellItem(new Item.Properties().stacksTo(64), "VillagerSpells"));
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "VillagerSpells", "Summon a temporary Iron Golem"));
 
     public static final RegistryObject<Item> HEAL = ITEMS.register("heal",
-            () -> new SpellItem(new Item.Properties().stacksTo(64), "VillagerSpells"));
+            () -> new SpellItem(new Item.Properties().stacksTo(64), "VillagerSpells","Instantly heal yourself"));
 
 
 

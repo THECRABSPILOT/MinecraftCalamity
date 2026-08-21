@@ -5,6 +5,8 @@ import crab.mods.minecraftcalamity.capability.AccessoryCapability;
 import crab.mods.minecraftcalamity.items.ModItems;
 import crab.mods.minecraftcalamity.network.ModMessages;
 import crab.mods.minecraftcalamity.network.SyncAccessoriesS2CPacket;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -13,7 +15,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -21,6 +29,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.ItemStackHandler;
@@ -43,18 +52,71 @@ public class AccessoryEventHandler {
                 }).orElse(false);
     }
 
+    @SubscribeEvent
+    public static void onBreakBlock(BlockEvent.BreakEvent event) {
+        Player player = event.getPlayer();
+        if (event.getLevel() instanceof Level level) {
+            if (player != null && hasAccessoryEquipped(player, ModItems.HEATER_GLOVE.get())) {
+                //freaking die - Gabriel ultrakill but censored
+                //im bored
+                //please work
+                if (level instanceof ServerLevel serverLevel) {
+                    BlockPos pos = event.getPos();
+                    BlockState state = event.getState();
+                    Block block = state.getBlock();
+
+                    var grabrecipes = level.getRecipeManager();
+                    var meltyrecipies = grabrecipes.getAllRecipesFor(RecipeType.SMELTING);
+                    ItemStack blockstak = new ItemStack(block.asItem()); //blehhha
+
+                    for (SmeltingRecipe recipe : meltyrecipies) {
+                        if (recipe.getIngredients().get(0).test(blockstak)) {
+                            ItemStack melted = recipe.getResultItem(level.registryAccess()).copy();
+
+                            serverLevel.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+
+                            ItemEntity itemEntity = new ItemEntity(serverLevel, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, melted);
+                            serverLevel.addFreshEntity(itemEntity);
+
+
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+    public static void MeltStuff(Level level, Block block) {
+        if (level.isClientSide) return; //freaking die
+        var grabrecipes = level.getRecipeManager();
+        var meltyrecipies = grabrecipes.getAllRecipesFor(RecipeType.SMELTING);
+        ItemStack blockstak = new ItemStack(block.asItem()); //blehhha
+
+        for (SmeltingRecipe recipe : meltyrecipies) {
+            if (recipe.getIngredients().get(0).test(blockstak)) {
+                ItemStack melted = recipe.getResultItem(level.registryAccess()).copy();
+
+
+
+                break;
+            }
+        }
+
+    }
 
     @SubscribeEvent
     public static void onLivingAttack(LivingAttackEvent event) {
         if (event.getEntity() instanceof Player player) {
-
+            //ctrl+C
             if (event.getSource().is(DamageTypeTags.IS_FIRE)) {
                 if (hasAccessoryEquipped(player, ModItems.TEST_ACCESSORY.get())) {
                     event.setCanceled(true);
                 }
             }
 
-
+            //ctrl+V
             if (event.getSource().is(DamageTypes.WITHER)) {
                 if (hasAccessoryEquipped(player, ModItems.CROSS_RING.get())) {
                     event.setCanceled(true);
@@ -169,4 +231,6 @@ public class AccessoryEventHandler {
             ModMessages.sendToPlayer(new SyncAccessoriesS2CPacket(cap.serializeNBT()), player);
         });
     }
+
+
 }

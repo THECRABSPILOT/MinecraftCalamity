@@ -93,7 +93,7 @@ public class SpellBookItem extends Item {
     }
 
     public static void setSelectedSlot(ItemStack stack, int slot, int maxSlots) {
-        // Prevent Division/Min clamp bugs if maxSlots is 0 or unassigned
+
         if (maxSlots <= 0) {
             maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : 1;
         }
@@ -101,18 +101,18 @@ public class SpellBookItem extends Item {
         stack.getOrCreateTag().putInt("SelectedSlot", clampedSlot);
     }
 
-    // --- Dynamic Per-Slot Hotbar Cooldown Graphics Overrides ---
+
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        // Look up the active slot's cooldown using NBT tags
+
         if (stack.hasTag() && stack.getTag().contains("SlotCooldowns")) {
             CompoundTag cooldownsTag = stack.getTag().getCompound("SlotCooldowns");
             int activeSlot = getSelectedSlot(stack);
 
             if (cooldownsTag.contains("Max_" + activeSlot)) {
                 long maxTicks = cooldownsTag.getLong("Max_" + activeSlot);
-                // Return true only if a valid cooldown target exists
+
                 return maxTicks > 0;
             }
         }
@@ -129,7 +129,7 @@ public class SpellBookItem extends Item {
                 long readyAtTick = cooldownsTag.getLong("Slot_" + activeSlot);
                 long maxTicks = cooldownsTag.getLong("Max_" + activeSlot);
 
-                // Use placeholder value if world reference isn't loaded inside rendering phase
+
                 long currentWorldTicks = net.minecraft.client.Minecraft.getInstance().level != null
                         ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : 0;
 
@@ -139,7 +139,7 @@ public class SpellBookItem extends Item {
                     return 0;
                 }
 
-                // Standard Minecraft hotbar bar is 13 pixels wide total
+
                 float progress = (float) remainingTicks / (float) maxTicks;
                 return Math.round(13.0F * (1.0F - progress));
             }
@@ -149,7 +149,6 @@ public class SpellBookItem extends Item {
 
     @Override
     public int getBarColor(ItemStack stack) {
-        // Returns a distinct light aqua blue color (0x36ebab) for spell cooldown bars
         return 0x36EBAB;
     }
 
@@ -183,7 +182,7 @@ public class SpellBookItem extends Item {
                 }
             }
         } else {
-            tooltipComponents.add(Component.literal("§8Hold §7[Shift]§8 for slot details"));
+            tooltipComponents.add(Component.literal("§8Hold §7[Shift]§8 for bound spells"));
         }
 
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
@@ -244,4 +243,58 @@ public class SpellBookItem extends Item {
         net.minecraft.resources.ResourceLocation itemKey = new net.minecraft.resources.ResourceLocation("minecraftcalamity", activeSpellId);
         Item registeredItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemKey);
 
-        if (!(registeredItem instanceof SpellItem spellItem)) {return;}String managerClassName = spellItem.getSpellId();try {String fullPath = "crab.mods.minecraftcalamity.items.spells.mage." + managerClassName;Class<?> managerClass = Class.forName(fullPath);Object managerInstance = managerClass.getDeclaredConstructor().newInstance();Method dataMethod = managerClass.getMethod("getspelldata");Object[][] data = (Object[][]) dataMethod.invoke(managerInstance);int manaCost = 0;double cooldownSeconds = 0.0;boolean spellFound = false;for (Object[] row : data) {if (row.length >= 3 && row[0].equals(activeSpellId)) {manaCost = ((Number) row[1]).intValue();cooldownSeconds = ((Number) row[2]).doubleValue();spellFound = true;break;}}if (!spellFound) return;PlayerMana mana = player.getCapability(ManaCapabilityProvider.PLAYER_MANA).orElse(null);if (mana != null) {if (mana.getCurrentMana() < manaCost) {player.sendSystemMessage(Component.literal("§cNot enough mana! Needs " + manaCost));return;}mana.consumeMana(player, manaCost);}int cooldownTicks = (int) (cooldownSeconds * 20);if (cooldownTicks > 0) {setSlotCooldown(stack, activeSlot, cooldownTicks, level.getGameTime());}Method spellMethod = managerClass.getMethod(activeSpellId, Player.class, Level.class);spellMethod.invoke(managerInstance, player, level);} catch (ClassNotFoundException e) {player.sendSystemMessage(Component.literal("§cSpell Manager class not found: " + managerClassName));} catch (NoSuchMethodException e) {player.sendSystemMessage(Component.literal("§cMethod '" + activeSpellId + "' not found inside manager."));} catch (Exception e) {e.printStackTrace();}}}
+        if (!(registeredItem instanceof SpellItem spellItem)) {
+            return;
+        }
+
+        String managerClassName = spellItem.getSpellId();
+
+        try {
+            String fullPath = "crab.mods.minecraftcalamity.items.spells.mage." + managerClassName;
+            Class<?> managerClass = Class.forName(fullPath);
+            Object managerInstance = managerClass.getDeclaredConstructor().newInstance();
+
+            Method dataMethod = managerClass.getMethod("getspelldata");
+            Object[][] data = (Object[][]) dataMethod.invoke(managerInstance);
+
+            int manaCost = 0;
+            double cooldownSeconds = 0.0;
+            boolean spellFound = false;
+
+            for (Object[] row : data) {
+                if (row.length >= 3 && row[0].equals(activeSpellId)) {
+                    manaCost = ((Number) row[1]).intValue();
+                    cooldownSeconds = ((Number) row[2]).doubleValue();
+                    spellFound = true;
+                    break;
+                }
+            }
+
+            if (!spellFound) return;
+
+            PlayerMana mana = player.getCapability(ManaCapabilityProvider.PLAYER_MANA).orElse(null);
+            if (mana != null) {
+                if (mana.getCurrentMana() < manaCost) {
+                    player.sendSystemMessage(Component.literal("§cNot enough mana! Needs " + manaCost));
+                    return;
+                }
+                mana.consumeMana(player, manaCost);
+            }
+
+            int cooldownTicks = (int) (cooldownSeconds * 20);
+            if (cooldownTicks > 0) {
+                setSlotCooldown(stack, activeSlot, cooldownTicks, level.getGameTime());
+            }
+
+            Method spellMethod = managerClass.getMethod(activeSpellId, Player.class, Level.class);
+            spellMethod.invoke(managerInstance, player, level);
+
+        } catch (ClassNotFoundException e) {
+            player.sendSystemMessage(Component.literal("§cSpell Manager class not found: " + managerClassName));
+        } catch (NoSuchMethodException e) {
+            player.sendSystemMessage(Component.literal("§cMethod '" + activeSpellId + "' not found inside manager."));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
