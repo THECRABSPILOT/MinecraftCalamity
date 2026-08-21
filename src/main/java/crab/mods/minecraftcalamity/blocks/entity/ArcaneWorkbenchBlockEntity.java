@@ -2,6 +2,7 @@ package crab.mods.minecraftcalamity.blocks.entity;
 
 import crab.mods.minecraftcalamity.items.magicitems.ModularStaffItem;
 import crab.mods.minecraftcalamity.items.magicitems.SpellBookItem;
+import crab.mods.minecraftcalamity.items.magicitems.SpellItem;
 import crab.mods.minecraftcalamity.menu.ArcaneWorkbenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,7 +34,8 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
     private final ItemStackHandler itemHandler = new ItemStackHandler(12) {
         @Override
         protected void onContentsChanged(int slot) {
-            if (slot == 0 || slot == 1) {
+            // Only clear the output preview if we are in "Preview Mode" (Adding Spell)
+            if ((slot == 0 || slot == 1) && isAddingSpell) {
                 ItemStack output = getStackInSlot(2);
                 if (!output.isEmpty()) {
                     setStackInSlot(2, ItemStack.EMPTY);
@@ -45,8 +47,6 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
     };
 
     private LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
-
-    // Flag to track whether we are adding a spell or extracting one
     private boolean isAddingSpell = false;
 
     public ArcaneWorkbenchBlockEntity(BlockPos pos, BlockState state) {
@@ -111,7 +111,7 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
             return;
         }
 
-        // SCENARIO 1: Assign Spell (Preview Staff with new spell in Output Slot 2)
+        // SCENARIO 1: Assign Spell (Preview Staff/Book with new spell in Output Slot 2)
         if (!spellInput.isEmpty()) {
             isAddingSpell = true;
             ItemStack modifiedItem = magicItemInput.copy();
@@ -119,6 +119,7 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
 
             ListTag spells = tag.contains("SpellModifiers", 9) ? tag.getList("SpellModifiers", 10) : new ListTag();
 
+            // Clear old modifier bound to this slot
             for (int i = spells.size() - 1; i >= 0; i--) {
                 if (spells.getCompound(i).getInt("Slot") == modifierIndex) {
                     spells.remove(i);
@@ -127,23 +128,32 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
 
             ResourceLocation spellIdKey = ForgeRegistries.ITEMS.getKey(spellInput.getItem());
             if (spellIdKey != null) {
+                // Read spell level if present
+                int spellLevel = 1;
+                if (spellInput.hasTag() && spellInput.getTag().contains("minecraftcalamity.level")) {
+                    spellLevel = spellInput.getTag().getInt("minecraftcalamity.level");
+                }
+
                 CompoundTag spellTag = new CompoundTag();
                 spellTag.putString("id", spellIdKey.toString());
                 spellTag.putInt("Slot", modifierIndex);
+                spellTag.putInt("Level", spellLevel);
 
                 spells.add(spellTag);
                 tag.put("SpellModifiers", spells);
 
+                // Update standard Spells compound tag used by SpellBookItem
                 CompoundTag spellsTag = tag.contains("Spells", 10) ? tag.getCompound("Spells") : new CompoundTag();
                 spellsTag.putString("Slot_" + modifierIndex, spellIdKey.getPath());
+                spellsTag.putInt("Level_" + modifierIndex, spellLevel);
                 tag.put("Spells", spellsTag);
 
-                // Place preview into output slot 2
+                // Output slot 2 holds the preview modified magic item
                 itemHandler.setStackInSlot(2, modifiedItem);
                 setChanged();
             }
         }
-        // SCENARIO 2: Extract Spell (Put ONLY the extracted Spell item in Output Slot 2, and update Slot 0 in-place)
+        // SCENARIO 2: Extract Spell (Extract Spell Item to Output Slot 2 and update Slot 0)
         else {
             isAddingSpell = false;
             CompoundTag tag = magicItemInput.getTag();
@@ -156,10 +166,14 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
                         Item spellItem = ForgeRegistries.ITEMS.getValue(spellId);
 
                         if (spellItem != null) {
-                            // 1. Put ONLY the extracted spell item into Output Slot 2
-                            itemHandler.setStackInSlot(2, new ItemStack(spellItem));
+                            // 1. Create extracted ItemStack and preserve its level
+                            ItemStack extractedSpell = new ItemStack(spellItem);
+                            int level = spellTag.contains("Level") ? spellTag.getInt("Level") : 1;
+                            extractedSpell.getOrCreateTag().putInt("minecraftcalamity.level", level);
 
-                            // 2. Modify Slot 0's item directly (remove the spell from its NBT) without moving it out of Slot 0
+                            itemHandler.setStackInSlot(2, extractedSpell);
+
+                            // 2. Remove spell from Slot 0's item NBT directly
                             CompoundTag modTag = magicItemInput.getOrCreateTag();
                             ListTag newSpells = new ListTag();
                             for (int j = 0; j < spells.size(); j++) {
@@ -170,7 +184,9 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
                             modTag.put("SpellModifiers", newSpells);
 
                             if (modTag.contains("Spells", 10)) {
-                                modTag.getCompound("Spells").remove("Slot_" + modifierIndex);
+                                CompoundTag spellsTag = modTag.getCompound("Spells");
+                                spellsTag.remove("Slot_" + modifierIndex);
+                                spellsTag.remove("Level_" + modifierIndex);
                             }
 
                             setChanged();
@@ -190,7 +206,7 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
         ItemStack spellInput = itemHandler.getStackInSlot(1);
 
         if (isAddingSpell) {
-            // When adding a spell, consume the input staff/book (slot 0) and the spell core (slot 1)
+            // Consume original magic item and spell core when crafting/adding
             ItemStack magicInput = itemHandler.getStackInSlot(0);
             if (!magicInput.isEmpty()) {
                 magicInput.shrink(1);
@@ -200,9 +216,6 @@ public class ArcaneWorkbenchBlockEntity extends BlockEntity implements MenuProvi
                 spellInput.shrink(1);
                 itemHandler.setStackInSlot(1, spellInput);
             }
-        } else {
-            // When extracting a spell, Slot 0 was already updated in-place. We do NOT consume the staff/book.
-            // We just let the player take their extracted spell out of slot 2.
         }
 
         itemHandler.setStackInSlot(2, ItemStack.EMPTY);

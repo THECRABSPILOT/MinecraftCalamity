@@ -93,7 +93,6 @@ public class SpellBookItem extends Item {
     }
 
     public static void setSelectedSlot(ItemStack stack, int slot, int maxSlots) {
-
         if (maxSlots <= 0) {
             maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : 1;
         }
@@ -101,18 +100,14 @@ public class SpellBookItem extends Item {
         stack.getOrCreateTag().putInt("SelectedSlot", clampedSlot);
     }
 
-
-
     @Override
     public boolean isBarVisible(ItemStack stack) {
-
         if (stack.hasTag() && stack.getTag().contains("SlotCooldowns")) {
             CompoundTag cooldownsTag = stack.getTag().getCompound("SlotCooldowns");
             int activeSlot = getSelectedSlot(stack);
 
             if (cooldownsTag.contains("Max_" + activeSlot)) {
                 long maxTicks = cooldownsTag.getLong("Max_" + activeSlot);
-
                 return maxTicks > 0;
             }
         }
@@ -129,7 +124,6 @@ public class SpellBookItem extends Item {
                 long readyAtTick = cooldownsTag.getLong("Slot_" + activeSlot);
                 long maxTicks = cooldownsTag.getLong("Max_" + activeSlot);
 
-
                 long currentWorldTicks = net.minecraft.client.Minecraft.getInstance().level != null
                         ? net.minecraft.client.Minecraft.getInstance().level.getGameTime() : 0;
 
@@ -138,7 +132,6 @@ public class SpellBookItem extends Item {
                 if (remainingTicks == 0 || maxTicks <= 0) {
                     return 0;
                 }
-
 
                 float progress = (float) remainingTicks / (float) maxTicks;
                 return Math.round(13.0F * (1.0F - progress));
@@ -157,28 +150,35 @@ public class SpellBookItem extends Item {
         int maxSlots = stack.hasTag() && stack.getTag().contains("SpellSlots") ? stack.getTag().getInt("SpellSlots") : this.SpellSlots;
         int activeSlot = getSelectedSlot(stack);
         String activeSpell = getSpellInSlot(stack, activeSlot);
+        int activeLevel = getSpellLevelInSlot(stack, activeSlot);
 
         tooltipComponents.add(Component.literal("§bSpell Slots: " + maxSlots));
 
         long currentTicks = level != null ? level.getGameTime() : 0;
         long remainingTicks = getRemainingCooldownTicks(stack, activeSlot, currentTicks);
+
+        String spellDisplayName = activeSpell.equals("Empty") ? "Empty" : activeSpell + " (Lvl " + activeLevel + ")";
+
         if (remainingTicks > 0) {
-            tooltipComponents.add(Component.literal("§eSelected Spell: §f" + activeSpell + " §c(" + String.format("%.1f", remainingTicks / 20.0f) + "s)"));
+            tooltipComponents.add(Component.literal("§eSelected Spell: §f" + spellDisplayName + " §c(" + String.format("%.1f", remainingTicks / 20.0f) + "s)"));
         } else {
-            tooltipComponents.add(Component.literal("§eSelected Spell: §f" + activeSpell));
+            tooltipComponents.add(Component.literal("§eSelected Spell: §f" + spellDisplayName));
         }
 
         if (net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
             tooltipComponents.add(Component.literal("§7--- Spell Slots ---"));
             for (int i = 0; i < maxSlots; i++) {
                 String assignedSpell = getSpellInSlot(stack, i);
+                int spellLvl = getSpellLevelInSlot(stack, i);
                 long slotRemaining = getRemainingCooldownTicks(stack, i, currentTicks);
                 String cooldownText = slotRemaining > 0 ? " §c[" + String.format("%.1f", slotRemaining / 20.0f) + "s]" : "";
 
+                String slotSpellText = assignedSpell.equals("Empty") ? "Empty" : assignedSpell + " [Lvl " + spellLvl + "]";
+
                 if (i == activeSlot) {
-                    tooltipComponents.add(Component.literal("§a> Slot " + (i + 1) + " [Active]: §f" + assignedSpell + cooldownText));
+                    tooltipComponents.add(Component.literal("§a> Slot " + (i + 1) + " [Active]: §f" + slotSpellText + cooldownText));
                 } else {
-                    tooltipComponents.add(Component.literal("§7- Slot " + (i + 1) + ": §8" + assignedSpell + cooldownText));
+                    tooltipComponents.add(Component.literal("§7- Slot " + (i + 1) + ": §8" + slotSpellText + cooldownText));
                 }
             }
         } else {
@@ -188,12 +188,22 @@ public class SpellBookItem extends Item {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
 
-    public static void setSpellInSlot(ItemStack stack, int slot, String spellId) {
-        CompoundTag tag = stack.getOrCreateTag();
+
+    public static void setSpellInSlot(ItemStack bookStack, int slot, ItemStack spellStack) {
+        CompoundTag tag = bookStack.getOrCreateTag();
         int maxSlots = tag.contains("SpellSlots") ? tag.getInt("SpellSlots") : 0;
-        if (slot >= 0 && slot < maxSlots) {
+
+        if (slot >= 0 && slot < maxSlots && spellStack.getItem() instanceof SpellItem) {
+            String spellId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(spellStack.getItem()).getPath();
+
+            int level = 1;
+            if (spellStack.hasTag() && spellStack.getTag().contains("minecraftcalamity.level")) {
+                level = spellStack.getTag().getInt("minecraftcalamity.level");
+            }
+
             CompoundTag spellsTag = tag.getCompound("Spells");
             spellsTag.putString("Slot_" + slot, spellId);
+            spellsTag.putInt("Level_" + slot, level);
             tag.put("Spells", spellsTag);
         }
     }
@@ -207,6 +217,16 @@ public class SpellBookItem extends Item {
             }
         }
         return "Empty";
+    }
+
+    public static int getSpellLevelInSlot(ItemStack stack, int slot) {
+        if (stack.hasTag() && stack.getTag().contains("Spells")) {
+            CompoundTag spellsTag = stack.getTag().getCompound("Spells");
+            if (spellsTag.contains("Level_" + slot)) {
+                return spellsTag.getInt("Level_" + slot);
+            }
+        }
+        return 1;
     }
 
     public static long getRemainingCooldownTicks(ItemStack stack, int slot, long currentWorldTicks) {
@@ -224,13 +244,14 @@ public class SpellBookItem extends Item {
         CompoundTag tag = stack.getOrCreateTag();
         CompoundTag cooldownsTag = tag.getCompound("SlotCooldowns");
         cooldownsTag.putLong("Slot_" + slot, currentWorldTicks + cooldownTicks);
-        cooldownsTag.putLong("Max_" + slot, cooldownTicks); // Stores total length to evaluate bar scale fractions
+        cooldownsTag.putLong("Max_" + slot, cooldownTicks);
         tag.put("SlotCooldowns", cooldownsTag);
     }
 
     public void castActiveSpell(ItemStack stack, Player player, Level level) {
         int activeSlot = getSelectedSlot(stack);
         String activeSpellId = getSpellInSlot(stack, activeSlot);
+        int spellLevel = getSpellLevelInSlot(stack, activeSlot);
 
         if (activeSpellId.equals("Empty")) {
             return;
@@ -262,11 +283,14 @@ public class SpellBookItem extends Item {
             boolean spellFound = false;
 
             for (Object[] row : data) {
-                if (row.length >= 3 && row[0].equals(activeSpellId)) {
-                    manaCost = ((Number) row[1]).intValue();
-                    cooldownSeconds = ((Number) row[2]).doubleValue();
-                    spellFound = true;
-                    break;
+                if (row.length >= 3 && row[0] != null) {
+                    String rowId = row[0].toString();
+                    if (rowId.equals(activeSpellId) || rowId.equals("minecraftcalamity:" + activeSpellId)) {
+                        manaCost = ((Number) row[1]).intValue();
+                        cooldownSeconds = ((Number) row[2]).doubleValue();
+                        spellFound = true;
+                        break;
+                    }
                 }
             }
 
@@ -286,13 +310,17 @@ public class SpellBookItem extends Item {
                 setSlotCooldown(stack, activeSlot, cooldownTicks, level.getGameTime());
             }
 
-            Method spellMethod = managerClass.getMethod(activeSpellId, Player.class, Level.class);
-            spellMethod.invoke(managerInstance, player, level);
+
+            try {
+                Method spellMethod = managerClass.getMethod(activeSpellId, Player.class, Level.class, int.class);
+                spellMethod.invoke(managerInstance, player, level, spellLevel);
+            } catch (NoSuchMethodException e) {
+                Method fallbackMethod = managerClass.getMethod(activeSpellId, Player.class, Level.class);
+                fallbackMethod.invoke(managerInstance, player, level);
+            }
 
         } catch (ClassNotFoundException e) {
             player.sendSystemMessage(Component.literal("§cSpell Manager class not found: " + managerClassName));
-        } catch (NoSuchMethodException e) {
-            player.sendSystemMessage(Component.literal("§cMethod '" + activeSpellId + "' not found inside manager."));
         } catch (Exception e) {
             e.printStackTrace();
         }

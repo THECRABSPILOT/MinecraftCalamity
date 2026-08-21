@@ -16,7 +16,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = "minecraftcalamity")
 public class VillagerSpells {
 
-    // Keep data clean and structured
     private static final Object[][] SPELL_DATA = {
             {"summon_golem", 50, 30},
             {"heal", 100, 60}
@@ -26,21 +25,19 @@ public class VillagerSpells {
         return SPELL_DATA;
     }
 
-    public void summon_golem(Player player, Level level) {
-        // 1. Guard check for server level execution
+    public void summon_golem(Player player, Level level, int spellLevel) {
         if (level.isClientSide()) {
             level.playSound(
-                    null,                                      // Player to exclude (null plays it for everyone)
-                    player.getX(), player.getY(), player.getZ(), // Coordinates where the sound originates
-                    net.minecraft.sounds.SoundEvents.WITHER_SPAWN, // The sound event
-                    net.minecraft.sounds.SoundSource.HOSTILE,   // Sound category
-                    1.0F,                                      // Volume
-                    1.0F                                       // Pitch
+                    null,
+                    player.getX(), player.getY(), player.getZ(),
+                    net.minecraft.sounds.SoundEvents.WITHER_SPAWN,
+                    net.minecraft.sounds.SoundSource.HOSTILE,
+                    1.0F,
+                    1.0F
             );
             return;
         }
 
-        // 2. Vector distance offset calculation
         Vec3 lookDirection = player.getLookAngle();
         double distanceBehind = 2.0;
 
@@ -48,17 +45,12 @@ public class VillagerSpells {
         double targetY = player.getY();
         double targetZ = player.getZ() - (lookDirection.z * distanceBehind);
 
-        // 3. Create the entity instance safely
         IronGolem ironGolem = EntityType.IRON_GOLEM.create(level);
 
         if (ironGolem != null) {
-            // Position the golem facing the exact same orientation as the caster
             ironGolem.moveTo(targetX, targetY, targetZ, player.getYRot(), player.getXRot());
-
-            // CRITICAL: Tells vanilla AI logic to guard the player and ignore friendly fire
             ironGolem.setPlayerCreated(true);
 
-            // Finalize attribute maps, localized dynamic health modifiers, and gear configurations
             ironGolem.finalizeSpawn(
                     (ServerLevel) level,
                     level.getCurrentDifficultyAt(player.blockPosition()),
@@ -67,15 +59,17 @@ public class VillagerSpells {
                     null
             );
 
-            // Inject the finalized golem into the world pipeline
             level.addFreshEntity(ironGolem);
 
+            // Base lifetime: 60s (1200 ticks). Adds +10s (+200 ticks) per level above level 1.
+            int durationSeconds = 60 + (Math.max(1, spellLevel) - 1) * 10;
+            int durationTicks = durationSeconds * 20;
+
             CompoundTag customData = ironGolem.getPersistentData();
-            long despawnTick = level.getGameTime() + 1200; // 60 seconds * 20 ticks
+            long despawnTick = level.getGameTime() + durationTicks;
             customData.putLong("DespawnTick", despawnTick);
 
-// Show custom name tag above its head
-            ironGolem.setCustomName(Component.literal("§eGolem §7(60s)"));
+            ironGolem.setCustomName(Component.literal("§eGolem §7(" + durationSeconds + "s)"));
             ironGolem.setCustomNameVisible(true);
         }
     }
@@ -90,17 +84,16 @@ public class VillagerSpells {
                 long currentTick = golem.level().getGameTime();
                 long ticksRemaining = despawnTick - currentTick;
 
-                // 1. Despawn if time runs out
+
                 if (ticksRemaining <= 0) {
-                    golem.discard(); // or golem.kill()
+                    golem.discard();
                     return;
                 }
 
-                // 2. Update nametag once per second (every 20 ticks) to prevent unnecessary updates
+
                 if (currentTick % 20 == 0) {
                     long secondsLeft = ticksRemaining / 20;
 
-                    // Color code changes to red when under 10 seconds remaining
                     String colorCode = secondsLeft <= 10 ? "§c" : "§e";
 
                     golem.setCustomName(Component.literal(colorCode + "Golem §7(" + secondsLeft + "s)"));
