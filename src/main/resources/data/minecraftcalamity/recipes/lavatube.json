@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GLG",
+    "SSS"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:lava_bucket"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "S": {
+      "item": "minecraft:netherite_scrap"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:lava_tube",
+    "count": 1
+  }
+}

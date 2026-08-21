@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    " GL",
+    "   "
+  ],
+  "key": {
+    "L": {
+      "item": "minecraftcalamity:lava_tube"
+    },
+    "G": {
+      "item": "minecraftcalamity:glove"
+    }
+  },
+  "result": {
+    "item": "minecraftcalamity:heater_glove",
+    "count": 1
+  }
+}
